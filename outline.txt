@@ -1,0 +1,82 @@
+# Comic Vault — Project Outline
+
+## What It Is
+Comic Vault is a full desktop comic book library manager inspired by Calibre. Instead of just sorting files headless, it provides a rich GUI to read, browse, manage, and edit the entire collection from one place.
+
+## Core Features
+- **Library Browser:** 
+  - Cover grid and list views. 
+  - Categories, favorites, tags, etc. 
+  - *GUI Concept:* Layout looks like a bunch of comics in a physical comic longbox/holder (e.g., labeled "X-Men" or "DC"), and the UX involves pulling them out.
+- **Built-in Comic Reader:**
+  - CBZ/CBR page-by-page display.
+  - Keyboard navigation, zoom functionality.
+  - Track read/unread status.
+  - Remember the last page read.
+- **Metadata Editor:**
+  - Right-click any comic to edit its metadata (publisher, series, storyline, issue number).
+  - Background processing to automatically rename/move the file and update the archive's internal `ComicInfo.xml`.
+  - ComicVine lookup from inside the editor to auto-fill metadata.
+- **Library Database:**
+  - Fast SQLite-backed search, filter, and sort capabilities.
+  - Filter by publisher, series, year, reading status, etc.
+- **Automation & Headless Sorting:**
+  - Keep a background/headless sorter running that watches a "Sort" folder.
+  - Auto-detect new files, extract info, convert, and sort them automatically.
+  - Drag-and-drop support: Import un-foldered individual comic files directly into the library window.
+  - macos and docker/nas friendly, windows/linux friendly is lesser priority.
+- **Issue Grouping & Album Management:**
+  - View all issues of a run together.
+  - *Smart Duplication Prompt:* When adding a "Library Version" or collected trade paperback, the app will ask if you want to keep or delete the individual loose issues (e.g., if you added the Volume 1 compilation, it prompts to remove single issues 1-13).
+- **Release Tracking:**
+  - Auto-lookup for upcoming series issues, providing release reminders so you never miss a pull.
+
+---
+
+## Architecture
+
+### What to reuse from Comic Sorter
+The existing engine is highly robust and carries over to serve as the backend logic:
+- `core.py` — File movement and operations.
+- `inference.py` — Metadata inference logic & ComicVine API interaction.
+- `metadata.py` — Filename string extraction.
+- `injector.py` — Writing `ComicInfo.xml` directly into CBZ archives.
+- `scanner.py` — Scraping directory structure for library paths.
+- `app_paths.py` / `rules.json` — Configuration and rule overrides.
+
+### New Layers Needed
+1. **Database Layer (SQLite)**
+   - Stores metadata: file path, publisher, series, storyline, issue, volume, cover image path, read status, last read page, file size, date added, ComicVine ID.
+   - Updated whenever a file is added, moved, or edited.
+
+2. **Backend Service (Python)**
+   - Wraps the existing engine.
+   - Exposes an IPC/REST API to the frontend for tasks like `scan_library()`, `get_comics()`, `get_page()`, `update_metadata()`, and automatic directory watching.
+
+3. **Frontend Application**
+   - **Library View:** Cover grid, sidebar filters, search bar, and physical "longbox" visual style.
+   - **Reader View:** Full-screen canvas or <img> sequence, left/right nav.
+   - **Detail Panel:** Inline metadata editor, ComicVine integration.
+
+### Proposed Tech Stack
+- **Application Shell:** Tauri 2 (Rust + WebView) — Small footprint, native OS integration, and seamless IPC with a Python sidecar.
+- **Frontend UI:** React + TypeScript (Zustand for state).
+- **Styling:** Custom CSS for the physical comic box visual look.
+- **Backend IPC:** Python (FastAPI or standard stdio sidecar to Tauri).
+- **Database:** SQLite.
+
+---
+
+## Open Development Questions
+
+1. **Tauri sidecar vs. FastAPI local server**
+   - Sidecar is cleaner to package but requires bundling Python via pyinstaller for the rust binary. FastAPI over localhost is easier to build out initially.
+   
+2. **Cover image storage**
+   - Extract page 1 of each CBZ at import time and save locally as a JPEG thumbnail for immediate grid load times, vs. unzipping headers on the fly.
+   
+3. **Reading progress sync**
+   - Keep it purely local (SQLite file), or build a small sync component (iCloud/Dropbox export) to retain marks across devices?
+   
+4. **Comic Sorter relationship**
+   - Do we embed `comic-sorter` as a git submodule inside `comic-vault/backend/engine/`, or do we absorb the code directly into this new repository?

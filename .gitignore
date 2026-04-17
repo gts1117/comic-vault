@@ -1,0 +1,68 @@
+# ── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+.env
+.venv
+env.bak/
+venv.bak/
+
+# ── Node / Frontend ─────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ── Tauri / Rust ─────────────────────────────────────────
+src-tauri/target/
+src-tauri/WixTools/
+src-tauri/Frameworks/
+
+# ── Build artefacts ──────────────────────────────────────
+*.dmg
+*.app/
+*.exe
+*.msi
+*.AppImage
+*.deb
+
+# ── Database & caches ───────────────────────────────────
+*.sqlite
+*.sqlite3
+*.db
+.comic_vault_cache.json
+comicvine_cache.json
+thumbs/
+
+# ── Project-specific configs (user-local) ────────────────
+config.json
+rules.json
+*_log.txt
+
+# ── OS generated files ──────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ── IDEs ─────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Gemini / AI agent metadata ───────────────────────────
+.agents/
