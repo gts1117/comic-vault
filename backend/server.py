@@ -52,6 +52,33 @@ def db_stats():
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+from pydantic import BaseModel
+
+class ImportRequest(BaseModel):
+    source_dir: str
+
+@app.post("/api/import")
+def trigger_import(req: ImportRequest):
+    import api_import
+    # Run the worker synchronously for now (production would wrap in background task)
+    results = api_import.scan_and_import(req.source_dir, db)
+    return results
+
+@app.get("/api/library")
+def get_library():
+    """Returns library tree"""
+    try:
+        # Just grab the top 100 for basic verification rendering
+        rows = db.fetch_all('''
+            SELECT c.id, c.title, c.issue_number, s.name as series_name, s.publisher
+            FROM comics c
+            JOIN series s ON c.series_id = s.id
+            LIMIT 100
+        ''')
+        return [dict(r) for r in rows]
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 def get_free_port():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('', 0))
