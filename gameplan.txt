@@ -1,0 +1,77 @@
+# Comic Vault: Strategic Game Plan
+
+This is the comprehensive breakdown of how we build Comic Vault, based on the outline and current ecosystem best practices.
+
+## 1. Architectural Strategy & Choices
+
+### The Sidecar Approach (Tauri + Python)
+*   **The Choice:** We will use the Tauri standard Sidecar pattern but communicate via a local HTTP server (FastAPI).
+*   **The Why:** Passing complex data (like binary image data, deeply nested JSON, or long-running stream statuses) natively over standard input/output (stdio) to Tauri can lead to deadlocks and serialization bottlenecks.
+*   **How it Works:** 
+    1. Tauri starts up and spawns the compiled Python binary (`backend.exe` / `backend-mac`).
+    2. The Python App starts a FastAPI server on a random available local port and prints `PORT=8080` to stdout.
+    3. Tauri reads the port from stdout, and passes it to the React frontend.
+    4. React makes standard API requests (`http://localhost:8080/api/...`) to fetch data, trigger scans, and stream comic pages.
+    5. When Tauri is closed, it kills the Python child process.
+
+### The Database (SQLite)
+*   **The Paradigm:** Separate *File Data* from *Metadata*.
+*   **Key Tables needed:** `LibraryFiles` (tracks physical location, checksum, format) -> `Comics` (tracks Issue #, Title, Reading Status) -> `Series` (tracks Publisher, Series Title).
+*   **Reasoning:** If a user moves a file, we just update `LibraryFiles`. If a CBZ is deleted, we don't lose our reading history or series metadata.
+
+### The Reader (Frontend)
+*   **The Pipeline:** We do NOT Unzip large archives to disk. The Python backend reads the `.cbz` via `zipfile` in-memory and serves the requested image buffer on the fly.
+*   **Web Rendering:** We will use standard React `<img>` tags relying on the browser's hardware acceleration combined with CSS `transform` for zooming. For a CBZ reader, heavy `<canvas>` manipulation is often overkill and prone to jitter compared to native CSS panning.
+*   **Memory Management:** The frontend will aggressively free up Object URLs (`URL.revokeObjectURL`) of previous pages to prevent the Chromium engine from memory leaking on high-res long-scroll issues.
+
+---
+
+## 2. Step-by-Step Implementation Map
+
+### Phase 1: Setup & Wiring (Scaffolding)
+1. Generate the Tauri v2 + React TypeScript shell (`create-tauri-app`).
+2. Set up the Python environment using `uv` (faster than pip/poetry) in `backend/`.
+3. Build the "Hello World" FastAPI sidecar.
+4. Configure PyInstaller scripts to bundle the Python API for macOS.
+5. Hook up the Tauri capability to spawn the sidecar and send a test ping from React to Python.
+
+### Phase 2: Engine Porting & Data Layer
+1. Move the `comic-sorter` logic (`core.py`, `inference.py`, `scanner.py`) into the `backend/` folder.
+2. Build the SQLite init script.
+3. Replace the `comic-sorter` CLI output with JSON responses suitable for the React UI.
+4. Implement the `/import` endpoint: Scans a folder, parses titles, fetches ComicVine data, builds thumbnails, and inserts into SQLite.
+
+### Phase 3: Library UI (The "Longbox")
+1. Setup Zustand for React state.
+2. Build the Grid View: Lazy-loaded cards displaying the cached thumbnails.
+3. Build the Sidebar: Dynamic filter lists powered by querying the SQLite via Python API.
+4. Implement search, sorting menus, and the visual aesthetic.
+
+### Phase 4: The Reader Experience
+1. Build the Reader Canvas component.
+2. Implement Python endpoint `/api/comic/{id}/page/{num}` to stream images from within the CBZ.
+3. Code the pre-fetch logic (always load next 2 pages in background).
+4. Save reading progress to the database on page turn.
+
+### Phase 5: Editor & Automation (Advanced)
+1. "Right-Click -> Edit Metadata" Modal in React.
+2. Form submission updates SQLite *and* calls `injector.py` to rewrite the `ComicInfo.xml` inside the physical `.cbz` file.
+3. Thread off the background folder watcher so it scans and imports in the background.
+
+---
+
+## 3. Potential Issues & Mitigations
+
+*   **Issue: The sidecar leaves zombied python processes if the app hard crashes.**
+    *   *Mitigation:* The Python daemon must implement a heartbeat monitor checking if its parent process PID is still alive. If parent dies, Python commits seppuku.
+*   **Issue: Extremely large Libraries (10,000+ issues) lagging the grid.**
+    *   *Mitigation:* Do not load all cover thumbs into memory. Use React virtualized lists (like `TanStack Virtual`) to only render what's in the current scroll viewport.
+*   **Issue: Build process complexity.**
+    *   *Mitigation:* Creating single file executables containing all dependencies (PyInstaller) causes massive file sizes (~50-100mb alone). We must aggressively narrow the Python libraries (e.g., avoid `pandas` or heavy ML libraries, use standard lib `sqlite3` instead of `SQLAlchemy` if possible).
+*   **Issue: Comicvine Rate Limits.**
+    *   *Mitigation:* `comic-sorter` already has a 1-second delay. We need to implement a global queue in the FastAPI server so if 500 issues are imported, they don't fire concurrently and trigger an API ban.
+
+---
+
+## 4. Next Actions
+Once the roadmap is approved, the immediate next action is executing **Phase 1** — scaffolding the Tauri front-end and initializing the Python FastAPI project side-by-side.
