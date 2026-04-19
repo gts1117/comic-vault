@@ -79,6 +79,69 @@ def get_library():
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+@app.get("/api/thumb/{comic_id}")
+def get_thumb(comic_id: int):
+    from fastapi.responses import FileResponse
+    from fastapi import HTTPException
+    import api_thumb
+    
+    thumb_path = api_thumb.get_thumbnail_path(comic_id, os.path.dirname(__file__))
+    if os.path.exists(thumb_path):
+        return FileResponse(thumb_path)
+        
+    row = db.fetch_one("SELECT file_path, cover_page_index FROM files WHERE comic_id = ?", (comic_id,))
+    if not row:
+        raise HTTPException(status_code=404, detail="Comic file not mapped in DB")
+        
+    file_path = row['file_path']
+    cover_idx = row['cover_page_index']
+    
+    success = api_thumb.extract_and_cache_thumbnail(file_path, thumb_path, cover_idx)
+    
+    if success and os.path.exists(thumb_path):
+        return FileResponse(thumb_path)
+    else:
+        # If it's a CBR, it returns False. 422 triggers Frontend to show Convert Button.
+        raise HTTPException(status_code=422, detail="Needs Conversion")
+
+@app.post("/api/convert/{comic_id}")
+def trigger_conversion(comic_id: int):
+    from fastapi import HTTPException
+    
+    row_file = db.fetch_one("SELECT id, file_path FROM files WHERE comic_id = ?", (comic_id,))
+    if not row_file:
+        raise HTTPException(status_code=404, detail="File entry not found")
+        
+    file_path = row_file['file_path']
+    if not file_path.lower().endswith(('.cbr', '.rar')):
+        return {"status": "ok", "message": "File is already standardized."}
+        
+    row_comic = db.fetch_one('''
+        SELECT c.issue_number, c.volume, s.name as series_name, s.publisher
+        FROM comics c
+        JOIN series s ON c.series_id = s.id
+        WHERE c.id = ?
+    ''', (comic_id,))
+    
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "engine"))
+    try:
+        from engine import injector
+        
+        pub = row_comic['publisher'] if row_comic else "Unknown"
+        series = row_comic['series_name'] if row_comic else "Unknown"
+        issue = row_comic['issue_number'] if row_comic else ""
+        vol = str(row_comic['volume']) if row_comic and row_comic['volume'] else ""
+        
+        new_path = injector.convert_cbr_to_cbz_and_inject(file_path, pub, series, "", issue, vol)
+        
+        # Update Database with new path mapping so UI doesn't lose it
+        db.execute("UPDATE files SET file_path = ? WHERE comic_id = ?", (new_path, comic_id))
+        
+        return {"status": "ok", "message": "Converted to CBZ successfully", "new_path": new_path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Conversion failed: {str(e)}")
+
 def get_free_port():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('', 0))
