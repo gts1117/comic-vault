@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useUIStore, useLibraryStore } from '../store';
 
 interface SidebarProps {
@@ -14,6 +14,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings, onOpenImport }
   const publishers = Array.from(new Set(
     (Array.isArray(comics) ? comics : []).map(c => c.publisher)
   )).sort();
+
+  const [isPublishersOpen, setIsPublishersOpen] = useState(false);
 
   return (
     <aside className="sidebar">
@@ -32,16 +34,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings, onOpenImport }
           All Comics
         </div>
         
-        <div className="nav-section-title">Publishers</div>
-        {publishers.map(pub => (
-          <div 
-            key={pub} 
-            className={`nav-item ${activePublisher === pub ? 'active' : ''}`}
-            onClick={() => setActivePublisher(pub)}
-          >
-            {pub}
+        <div 
+          className="nav-section-title"
+          onClick={() => setIsPublishersOpen(!isPublishersOpen)}
+        >
+          <span>Publishers</span>
+          <span className={`chevron ${isPublishersOpen ? 'open' : ''}`}>▼</span>
+        </div>
+        
+        <div className={`collapsible-content ${isPublishersOpen ? 'open' : ''}`}>
+          <div className="collapsible-inner">
+            {publishers.map(pub => (
+              <div 
+                key={pub} 
+                className={`nav-item ${activePublisher === pub ? 'active' : ''}`}
+                onClick={() => setActivePublisher(pub)}
+              >
+                {pub}
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </nav>
 
       <div className="sidebar-footer">
