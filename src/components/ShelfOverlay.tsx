@@ -90,45 +90,101 @@ interface ShelfOverlayProps {
 }
 
 export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick }) => {
-  const [slots, setSlots] = useState<Slot[]>(INITIAL_SLOTS);
+  // assignments maps box.id to an index in INITIAL_SLOTS
+  const [assignments, setAssignments] = useState<Record<string, number>>(() => {
+    const initial: Record<string, number> = {};
+    boxes.forEach((box, idx) => {
+      if (idx < INITIAL_SLOTS.length) {
+        initial[box.id] = idx;
+      }
+    });
+    return initial;
+  });
+
   const [editMode, setEditMode] = useState(false);
-  const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
+  const [draggingBoxId, setDraggingBoxId] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
+  const [hoveredSlotIdx, setHoveredSlotIdx] = useState<number | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const handlePointerDown = (e: React.PointerEvent, idx: number) => {
+  const handlePointerDown = (e: React.PointerEvent, boxId: string) => {
     if (!editMode) return;
     e.preventDefault();
-    setDraggingIdx(idx);
+    setDraggingBoxId(boxId);
+    
+    // Set initial mouse pos
+    if (overlayRef.current) {
+      const rect = overlayRef.current.getBoundingClientRect();
+      const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
+      const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
+      setMousePos({ x: xPercent, y: yPercent });
+    }
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!editMode || draggingIdx === null || !overlayRef.current) return;
+    if (!editMode || !draggingBoxId || !overlayRef.current) return;
     
     const rect = overlayRef.current.getBoundingClientRect();
     const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
     const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
 
-    setSlots(prev => {
-      const newSlots = [...prev];
-      newSlots[draggingIdx] = {
-        ...newSlots[draggingIdx],
-        left: `${xPercent.toFixed(1)}%`,
-        top: `${yPercent.toFixed(1)}%`
-      };
-      return newSlots;
+    setMousePos({ x: xPercent, y: yPercent });
+
+    // Find closest slot to snap to
+    let minDistance = Infinity;
+    let closestIdx = -1;
+    
+    INITIAL_SLOTS.forEach((slot, idx) => {
+      const slotX = parseFloat(slot.left);
+      const slotY = parseFloat(slot.top);
+      const dist = Math.sqrt(Math.pow(xPercent - slotX, 2) + Math.pow(yPercent - slotY, 2));
+      
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestIdx = idx;
+      }
     });
+
+    // Snap distance threshold (in percentage)
+    if (minDistance < 8) {
+      setHoveredSlotIdx(closestIdx);
+    } else {
+      setHoveredSlotIdx(null);
+    }
   };
 
   const handlePointerUp = () => {
-    if (draggingIdx !== null) {
-      setDraggingIdx(null);
+    if (draggingBoxId) {
+      if (hoveredSlotIdx !== null) {
+        setAssignments(prev => {
+          const newAssign = { ...prev };
+          // Check if another box is in this slot
+          const previousOccupantId = Object.keys(newAssign).find(id => newAssign[id] === hoveredSlotIdx);
+          const oldSlotIdx = newAssign[draggingBoxId];
+          
+          newAssign[draggingBoxId] = hoveredSlotIdx;
+          
+          // Swap logic
+          if (previousOccupantId && previousOccupantId !== draggingBoxId && oldSlotIdx !== undefined) {
+             newAssign[previousOccupantId] = oldSlotIdx;
+          } else if (previousOccupantId && previousOccupantId !== draggingBoxId) {
+             // If the dragged box had no prior slot, just evict the old occupant (remove assignment)
+             delete newAssign[previousOccupantId];
+          }
+          
+          return newAssign;
+        });
+      }
+      setDraggingBoxId(null);
+      setMousePos(null);
+      setHoveredSlotIdx(null);
     }
   };
 
   const exportCoordinates = () => {
-    const json = JSON.stringify(slots, null, 2);
+    const json = JSON.stringify(assignments, null, 2);
     navigator.clipboard.writeText(json);
-    alert("Coordinates copied to clipboard! Paste them to Antigravity.");
+    alert("Box assignments copied to clipboard! Paste them to Antigravity.");
   };
 
   return (
@@ -140,25 +196,64 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        {boxes.map((box, idx) => {
-          if (idx >= slots.length) return null;
+        {/* Render Snap Highlight */}
+        {editMode && hoveredSlotIdx !== null && (
+          <div
+            style={{
+              position: 'absolute',
+              left: INITIAL_SLOTS[hoveredSlotIdx].left,
+              top: INITIAL_SLOTS[hoveredSlotIdx].top,
+              width: INITIAL_SLOTS[hoveredSlotIdx].width,
+              height: '14%', // approximate height of box
+              transform: `perspective(1000px) rotateY(${INITIAL_SLOTS[hoveredSlotIdx].rotateY}) skewY(${INITIAL_SLOTS[hoveredSlotIdx].skewY}) translate(-50%, -50%)`,
+              backgroundColor: 'rgba(255, 255, 255, 0.3)',
+              border: '2px dashed rgba(255,255,255,0.8)',
+              borderRadius: '4px',
+              pointerEvents: 'none',
+              zIndex: 10
+            }}
+          />
+        )}
+
+        {boxes.map((box) => {
+          const slotIdx = assignments[box.id];
+          const isDragging = draggingBoxId === box.id;
           
-          const slot = slots[idx];
+          if (slotIdx === undefined && !isDragging) return null;
+          
+          let left, top, width, rotateY, skewY;
+          
+          if (isDragging && mousePos) {
+            left = `${mousePos.x}%`;
+            top = `${mousePos.y}%`;
+            // Keep perspective of the closest hovered slot, or fallback to its original slot
+            const sourceSlot = hoveredSlotIdx !== null ? INITIAL_SLOTS[hoveredSlotIdx] : (slotIdx !== undefined ? INITIAL_SLOTS[slotIdx] : INITIAL_SLOTS[0]);
+            width = sourceSlot.width;
+            rotateY = sourceSlot.rotateY;
+            skewY = sourceSlot.skewY;
+          } else {
+            const slot = INITIAL_SLOTS[slotIdx!];
+            left = slot.left;
+            top = slot.top;
+            width = slot.width;
+            rotateY = slot.rotateY;
+            skewY = slot.skewY;
+          }
           
           return (
             <div 
               key={box.id} 
               className="shelf-box"
-              onPointerDown={(e) => handlePointerDown(e, idx)}
+              onPointerDown={(e) => handlePointerDown(e, box.id)}
               onClick={() => !editMode && onBoxClick(box)}
               style={{
-                left: slot.left,
-                top: slot.top,
-                width: slot.width,
-                transform: `perspective(1000px) rotateY(${slot.rotateY}) skewY(${slot.skewY}) translate(-50%, -50%)`,
-                cursor: editMode ? 'move' : 'pointer',
-                transition: draggingIdx === idx ? 'none' : undefined,
-                zIndex: draggingIdx === idx ? 1000 : undefined
+                left,
+                top,
+                width,
+                transform: `perspective(1000px) rotateY(${rotateY}) skewY(${skewY}) translate(-50%, -50%)`,
+                cursor: editMode ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
+                transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                zIndex: isDragging ? 1000 : undefined
               }}
             >
               <div className="box-inner">
