@@ -37,11 +37,13 @@ src-tauri/Frameworks/
 
 # ── Database & caches ───────────────────────────────────
 *.sqlite
+*.sqlite-*
 *.sqlite3
 *.db
 .comic_vault_cache.json
 comicvine_cache.json
 thumbs/
+logs/
 
 # ── Project-specific configs (user-local) ────────────────
 config.json

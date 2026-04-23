@@ -2,10 +2,12 @@ import sqlite3
 import os
 import threading
 from pathlib import Path
+from logger import get_logger
 
 # Thread-local storage to keep one SQLite connection per thread 
 # (SQLite in python restricts connections across threads by default unless check_same_thread=False)
 local_storage = threading.local()
+logger = get_logger("vault.db")
 
 class DatabaseManager:
     def __init__(self, db_path: str):
@@ -52,7 +54,7 @@ class DatabaseManager:
             conn.executescript(sql_script)
             conn.commit()
         except sqlite3.Error as e:
-            print(f"Error applying schema: {e}")
+            logger.error(f"Error applying schema: {e}")
             conn.rollback()
 
     # Helpers

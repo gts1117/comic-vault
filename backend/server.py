@@ -19,14 +19,17 @@ else:
     BUNDLE_DIR = os.path.dirname(os.path.abspath(__file__))
     RUNTIME_DIR = BUNDLE_DIR
 
+from logger import get_logger
+
 DB_PATH = os.path.join(RUNTIME_DIR, "comic_vault.sqlite")
+logger = get_logger("vault.server", RUNTIME_DIR)
 db = DatabaseManager(DB_PATH)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup logic
     schema_path = os.path.join(BUNDLE_DIR, "schema.sql")
-    print(f"Applying schema from: {schema_path}", flush=True)
+    logger.info(f"Applying schema from: {schema_path}")
     db.apply_schema(schema_path)
     yield
     # Shutdown logic
@@ -89,7 +92,7 @@ def get_library():
         ''')
         return [dict(r) for r in rows]
     except Exception as e:
-        print(f"Library fetch error: {e}")
+        logger.error(f"Library fetch error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/thumb/{comic_id}")
@@ -176,7 +179,7 @@ def update_settings(req: SettingsUpdate):
         # If the library path is set, trigger an initial scan so the user sees results immediately
         if key == "library_path" and value:
             import api_import
-            print(f"Triggering initial library scan for: {value}")
+            logger.info(f"Triggering initial library scan for: {value}")
             api_import.scan_and_import(value, db)
             
     return {"status": "success"}
@@ -211,6 +214,7 @@ if __name__ == "__main__":
     port = get_free_port()
     # Print the port to stdout so Tauri can capture it
     print(f"PORT={port}", flush=True)
+    logger.info(f"Starting uvicorn on port {port}")
     
     # Run user application
     uvicorn.run(app, host="127.0.0.1", port=port, log_level="error")

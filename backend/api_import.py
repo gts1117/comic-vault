@@ -6,6 +6,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "engine"))
 from engine import inference
 from engine import metadata as engine_metadata
 from engine.core import ComicSorterEngine
+from logger import get_logger
+
+logger = get_logger("vault.import")
 
 def scan_and_import(source_dir: str, db):
     """
@@ -29,7 +32,7 @@ def scan_and_import(source_dir: str, db):
                 
             results["found"] += 1
             file_path = os.path.join(root, f)
-            print(f"Importing: {file_path}")
+            logger.info(f"Importing: {file_path}")
             
             # File uniqueness validation
             stat = os.stat(file_path)
@@ -69,7 +72,7 @@ def scan_and_import(source_dir: str, db):
                 results["imported"] += 1
 
             except Exception as e:
-                print(f"  [!] Import failed for {f}: {e}")
+                logger.error(f"Import failed for {f}: {e}")
                 results["errors"].append(f"Failed {f}: {str(e)}")
 
     return results
@@ -93,7 +96,7 @@ def organized_import(source_dir: str, dest_dir: str, move_files: bool, db):
 
     callbacks = {
         "on_finish": on_finish,
-        "log": lambda m: print(f"[Engine] {m}")
+        "log": lambda m: logger.info(f"[Engine] {m}")
     }
 
     engine = ComicSorterEngine(callbacks)
