@@ -12,36 +12,35 @@ interface Slot {
 // Manually mapped coordinates for the shelves in room_bg.png
 // Right bookcase (flatter)
 const RIGHT_SHELF_SLOTS: Slot[] = [
-  { left: '68%', top: '15.5%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '79%', top: '15.5%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '90%', top: '15.5%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '69%', top: '24%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '78%', top: '25.5%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '87%', top: '27%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
   
-  { left: '68%', top: '28%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '79%', top: '28%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '90%', top: '28%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '69%', top: '42%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '78%', top: '43.5%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '87%', top: '45%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
 
-  { left: '68%', top: '40.5%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '79%', top: '40.5%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '90%', top: '40.5%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '69%', top: '59%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '78%', top: '61%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '87%', top: '63%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
 
-  { left: '68%', top: '53.5%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '79%', top: '53.5%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '90%', top: '53.5%', width: '10.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '69%', top: '77%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '78%', top: '79%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
+  { left: '87%', top: '81%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
 ];
 
-// Left bookcase (angled)
-const LEFT_SHELF_SLOTS: Slot[] = [
-  { left: '41%', top: '18%', width: '11%', rotateY: '25deg', skewY: '-10deg' },
-  { left: '52%', top: '16.5%', width: '11%', rotateY: '20deg', skewY: '-5deg' },
+// Middle bookcase (angled)
+const MIDDLE_SHELF_SLOTS: Slot[] = [
+  { left: '40%', top: '19.5%', width: '8%', rotateY: '25deg', skewY: '-4deg' },
+  { left: '48%', top: '22%', width: '8%', rotateY: '25deg', skewY: '-4deg' },
+  { left: '56%', top: '24.5%', width: '8%', rotateY: '25deg', skewY: '-4deg' },
   
-  { left: '41%', top: '30%', width: '11%', rotateY: '25deg', skewY: '-10deg' },
-  { left: '52%', top: '28.5%', width: '11%', rotateY: '20deg', skewY: '-5deg' },
-
-  { left: '41%', top: '43%', width: '11%', rotateY: '25deg', skewY: '-10deg' },
-  { left: '52%', top: '41.5%', width: '11%', rotateY: '20deg', skewY: '-5deg' },
+  { left: '40%', top: '38%', width: '8%', rotateY: '25deg', skewY: '-4deg' },
+  { left: '48%', top: '41%', width: '8%', rotateY: '25deg', skewY: '-4deg' },
+  { left: '56%', top: '44%', width: '8%', rotateY: '25deg', skewY: '-4deg' },
 ];
 
-const ALL_SLOTS = [...RIGHT_SHELF_SLOTS, ...LEFT_SHELF_SLOTS];
+const ALL_SLOTS = [...RIGHT_SHELF_SLOTS, ...MIDDLE_SHELF_SLOTS];
 
 interface BoxData {
   id: string;
