@@ -120,6 +120,68 @@ def get_thumb(comic_id: int):
         # If it's a CBR, it returns False. 422 triggers Frontend to show Convert Button.
         raise HTTPException(status_code=422, detail="Needs Conversion")
 
+@app.get("/api/comic/{comic_id}/read")
+def get_comic_read_status(comic_id: int):
+    from fastapi import HTTPException
+    import api_reader
+    
+    row = db.fetch_one('''
+        SELECT c.current_page, c.read_status, f.file_path 
+        FROM comics c
+        JOIN files f ON f.comic_id = c.id
+        WHERE c.id = ?
+    ''', (comic_id,))
+    
+    if not row:
+        raise HTTPException(status_code=404, detail="Comic not found")
+        
+    file_path = row['file_path']
+    if file_path.lower().endswith(('.cbr', '.rar')):
+        raise HTTPException(status_code=422, detail="Needs Conversion")
+        
+    meta = api_reader.get_comic_metadata(file_path)
+    if "error" in meta:
+        raise HTTPException(status_code=500, detail=meta["error"])
+        
+    return {
+        "current_page": row['current_page'],
+        "read_status": row['read_status'],
+        "total_pages": meta['total_pages']
+    }
+
+@app.get("/api/comic/{comic_id}/page/{page_num}")
+def get_comic_page(comic_id: int, page_num: int):
+    from fastapi import HTTPException
+    from fastapi.responses import Response
+    import api_reader
+    
+    row = db.fetch_one("SELECT file_path FROM files WHERE comic_id = ?", (comic_id,))
+    if not row:
+        raise HTTPException(status_code=404, detail="File not found")
+        
+    file_path = row['file_path']
+    result = api_reader.get_page_image_bytes(file_path, page_num)
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Page not found or error extracting")
+        
+    img_data, content_type = result
+    return Response(content=img_data, media_type=content_type)
+
+class ProgressUpdate(BaseModel):
+    current_page: int
+    is_completed: bool = False
+
+@app.post("/api/comic/{comic_id}/progress")
+def update_progress(comic_id: int, req: ProgressUpdate):
+    read_status = 2 if req.is_completed else 1 # 2: Read, 1: In Progress
+    
+    db.execute(
+        "UPDATE comics SET current_page = ?, read_status = ? WHERE id = ?",
+        (req.current_page, read_status, comic_id)
+    )
+    return {"status": "ok"}
+
 @app.post("/api/convert/{comic_id}")
 def trigger_conversion(comic_id: int):
     from fastapi import HTTPException
