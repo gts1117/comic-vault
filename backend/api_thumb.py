@@ -2,6 +2,7 @@ import os
 import zipfile
 from io import BytesIO
 from PIL import Image
+Image.MAX_IMAGE_PIXELS = None
 
 def get_thumbnail_path(comic_id: int, base_dir: str) -> str:
     thumbs_dir = os.path.join(base_dir, "thumbs")

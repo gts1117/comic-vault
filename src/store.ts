@@ -6,6 +6,7 @@ export interface Comic {
   issue_number: string
   series_name: string
   publisher: string
+  file_path: string
 }
 
 interface LibraryState {
@@ -30,16 +31,24 @@ interface UIState {
   apiPort: number | null
   activePublisher: string | null
   searchQuery: string
+  libraryPath: string | null
+  isImporting: boolean
   setApiPort: (port: number) => void
   setActivePublisher: (pub: string | null) => void
   setSearchQuery: (query: string) => void
+  setLibraryPath: (path: string | null) => void
+  setIsImporting: (isImporting: boolean) => void
 }
 
 export const useUIStore = create<UIState>((set) => ({
   apiPort: null,
   activePublisher: null,
   searchQuery: "",
+  libraryPath: null,
+  isImporting: false,
   setApiPort: (apiPort) => set({ apiPort }),
   setActivePublisher: (activePublisher) => set({ activePublisher }),
   setSearchQuery: (searchQuery) => set({ searchQuery }),
+  setLibraryPath: (libraryPath) => set({ libraryPath }),
+  setIsImporting: (isImporting) => set({ isImporting }),
 }))

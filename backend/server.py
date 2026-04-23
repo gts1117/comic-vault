@@ -8,14 +8,25 @@ from contextlib import asynccontextmanager
 from database import DatabaseManager
 import os
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "comic_vault.sqlite")
+# When bundled by PyInstaller, resource files are in sys._MEIPASS.
+# When running from source, they live next to this file.
+if getattr(sys, 'frozen', False):
+    # Bundled: schema/engine code is in the temp extraction dir
+    BUNDLE_DIR = sys._MEIPASS
+    # Database and thumbs should persist next to the actual binary, not in the temp dir
+    RUNTIME_DIR = os.path.dirname(sys.executable)
+else:
+    BUNDLE_DIR = os.path.dirname(os.path.abspath(__file__))
+    RUNTIME_DIR = BUNDLE_DIR
+
+DB_PATH = os.path.join(RUNTIME_DIR, "comic_vault.sqlite")
 db = DatabaseManager(DB_PATH)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup logic
-    schema_path = os.path.join(os.path.dirname(__file__), "schema.sql")
-    print("Applying schema if not exists...", flush=True)
+    schema_path = os.path.join(BUNDLE_DIR, "schema.sql")
+    print(f"Applying schema from: {schema_path}", flush=True)
     db.apply_schema(schema_path)
     yield
     # Shutdown logic
@@ -70,14 +81,16 @@ def get_library():
     try:
         # Just grab the top 100 for basic verification rendering
         rows = db.fetch_all('''
-            SELECT c.id, c.title, c.issue_number, s.name as series_name, s.publisher
+            SELECT c.id, c.title, c.issue_number, s.name as series_name, s.publisher, f.file_path
             FROM comics c
             JOIN series s ON c.series_id = s.id
-            LIMIT 100
+            JOIN files f ON f.comic_id = c.id
+            ORDER BY s.publisher, s.name, c.issue_number
         ''')
         return [dict(r) for r in rows]
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        print(f"Library fetch error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/thumb/{comic_id}")
 def get_thumb(comic_id: int):
@@ -85,7 +98,7 @@ def get_thumb(comic_id: int):
     from fastapi import HTTPException
     import api_thumb
     
-    thumb_path = api_thumb.get_thumbnail_path(comic_id, os.path.dirname(__file__))
+    thumb_path = api_thumb.get_thumbnail_path(comic_id, RUNTIME_DIR)
     if os.path.exists(thumb_path):
         return FileResponse(thumb_path)
         
@@ -124,7 +137,7 @@ def trigger_conversion(comic_id: int):
     ''', (comic_id,))
     
     import sys
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "engine"))
+    sys.path.insert(0, os.path.join(BUNDLE_DIR, "engine"))
     try:
         from engine import injector
         
@@ -141,6 +154,51 @@ def trigger_conversion(comic_id: int):
         return {"status": "ok", "message": "Converted to CBZ successfully", "new_path": new_path}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Conversion failed: {str(e)}")
+
+# --- SETTINGS ---
+
+@app.get("/api/settings")
+def get_settings():
+    rows = db.fetch_all("SELECT key, value FROM settings")
+    return {row['key']: row['value'] for row in rows}
+
+class SettingsUpdate(BaseModel):
+    settings: dict
+
+@app.post("/api/settings")
+def update_settings(req: SettingsUpdate):
+    for key, value in req.settings.items():
+        db.execute(
+            "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+            (key, value)
+        )
+        
+        # If the library path is set, trigger an initial scan so the user sees results immediately
+        if key == "library_path" and value:
+            import api_import
+            print(f"Triggering initial library scan for: {value}")
+            api_import.scan_and_import(value, db)
+            
+    return {"status": "success"}
+
+# --- ORGANIZED IMPORT ---
+
+class OrganizedImportRequest(BaseModel):
+    source_dir: str
+    mode: str = "copy" # "copy" or "move"
+
+@app.post("/api/import/organized")
+def trigger_organized_import(req: OrganizedImportRequest):
+    # Get master library path
+    lib_row = db.fetch_one("SELECT value FROM settings WHERE key = 'library_path'")
+    if not lib_row or not lib_row['value']:
+        raise HTTPException(status_code=400, detail="Master library path not set in settings.")
+    
+    dest_dir = lib_row['value']
+    
+    import api_import
+    results = api_import.organized_import(req.source_dir, dest_dir, req.mode == "move", db)
+    return results
 
 def get_free_port():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

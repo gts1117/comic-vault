@@ -23,7 +23,10 @@ export function CategorizedGrid() {
   }
 
   return (
-    <div className="main-view">
+    <div className="main-content">
+      <div style={{ marginBottom: '20px', opacity: 0.6, fontSize: '0.9rem' }}>
+        Total Comics: {comics.length}
+      </div>
       {Object.entries(groups).map(([publisher, items]) => (
         <div key={publisher} style={{ marginBottom: '40px' }}>
           <div className="publisher-tab">{publisher}</div>

@@ -1,52 +1,87 @@
 import { useEffect } from 'react'
-import { invoke } from '@tauri-apps/api/core'
+import { listen, emit } from '@tauri-apps/api/event'
 import { useUIStore, useLibraryStore } from '../store'
 
 export function useBackend() {
-  const { apiPort, setApiPort } = useUIStore()
+  const { apiPort, setApiPort, setLibraryPath } = useUIStore()
   const { setComics, setError, setLoading } = useLibraryStore()
 
   useEffect(() => {
-    async function handShake() {
+    let unlisten: (() => void) | null = null;
+
+    async function setupHandshake() {
       try {
-        console.log("Requesting port from Rust...")
-        // We poll because the python sidecar takes a second to boot and bind
-        let retries = 5;
-        let port: number | null = null;
-        while (retries > 0 && port === null) {
-          port = await invoke('get_backend_port')
-          if (port) break;
-          await new Promise(r => setTimeout(r, 1000));
-          retries--;
-        }
+        console.log("Setting up handshake listeners...");
         
-        if (port) {
-            console.log("Handshake successful. API running on port", port);
-            setApiPort(port)
-            fetchLibrary(port)
-        } else {
-            setError("Failed to get backend port from sidecar.")
-        }
+        // 1. Listen for the backend port
+        unlisten = await listen<number>('backend-ready', (event) => {
+          const port = event.payload;
+          console.log("Handshake successful via event. API running on port", port);
+          setApiPort(port)
+          initializeStates(port)
+        })
+
+        // 2. Tell Rust we're ready to receive the port
+        // If the sidecar already started, Rust will re-emit on this signal.
+        console.log("Signaling 'frontend-ready' to Rust...");
+        await emit('frontend-ready');
+        
       } catch (e) {
-        console.error(e)
-        setError("Error connecting to backend sidecar.")
+        console.error("Failed to setup handshake", e)
+        setError("Error setting up backend connection.")
       }
     }
-    
+
     if (!apiPort) {
-        handShake()
+      setupHandshake()
+    }
+
+    return () => {
+      if (unlisten) unlisten()
     }
   }, [apiPort])
 
-  async function fetchLibrary(port: number) {
+  async function initializeStates(port: number) {
+      // 1. Fetch settings (Library Path)
+      try {
+          // Small delay to ensure server is fully bound
+          await new Promise(r => setTimeout(r, 500));
+          
+          const sResp = await fetch(`http://127.0.0.1:${port}/api/settings`)
+          if (sResp.ok) {
+              const settings = await sResp.json()
+              if (settings.library_path) {
+                  setLibraryPath(settings.library_path)
+              }
+          }
+      } catch (e) {
+          console.error("Failed to fetch settings", e)
+      }
+
+      // 2. Fetch Initial Library
+      fetchLibraryWithRetry(port)
+  }
+
+  async function fetchLibraryWithRetry(port: number, retries = 5) {
     setLoading(true)
     try {
-      const resp = await fetch(`http://localhost:${port}/api/library`)
+      console.log(`Fetching library from 127.0.0.1:${port} (retries: ${retries})...`);
+      const resp = await fetch(`http://127.0.0.1:${port}/api/library`)
       if (!resp.ok) throw new Error("Network response was not ok")
       const data = await resp.json()
-      setComics(data)
+      if (Array.isArray(data)) {
+        console.log(`Loaded ${data.length} comics.`);
+        setComics(data)
+      } else {
+        console.error("Library data is not an array:", data);
+        setError("Received invalid data format from server.")
+      }
     } catch (e) {
-      console.error(e)
+      console.error(`Fetch attempt failed (${retries} left):`, e)
+      if (retries > 0) {
+        await new Promise(r => setTimeout(r, 1000));
+        return fetchLibraryWithRetry(port, retries - 1);
+      }
       setError("Failed to fetch library data.")
     }
   }

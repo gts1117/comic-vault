@@ -55,6 +55,15 @@ CREATE TABLE IF NOT EXISTS comic_tags (
     FOREIGN KEY(tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
 
+-- 6. Settings: Key-Value store for app configuration
+CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+);
+
+-- Initial default settings
+INSERT OR IGNORE INTO settings (key, value) VALUES ('library_path', NULL);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_series_name ON series(name);
 CREATE INDEX IF NOT EXISTS idx_comics_series ON comics(series_id);

@@ -1,11 +1,11 @@
 import sys
 import os
-import threading
 
 # Add engine to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "engine"))
 from engine import inference
 from engine import metadata as engine_metadata
+from engine.core import ComicSorterEngine
 
 def scan_and_import(source_dir: str, db):
     """
@@ -31,26 +31,18 @@ def scan_and_import(source_dir: str, db):
             file_path = os.path.join(root, f)
             print(f"Importing: {file_path}")
             
-            # File uniqueness validation (skip if already exists)
+            # File uniqueness validation
             stat = os.stat(file_path)
             file_size = stat.st_size
             
-            # Very fast footprint hashing based on comic-sorter logic
-            # For brevity in the basic API, we use path+size
             if db.fetch_one("SELECT id FROM files WHERE file_path = ? OR file_size = ?", (file_path, file_size)):
-                # Note: file_size isn't technically unique on its own globally, but combined with the path it serves as a lightweight check
-                # Our actual checksum logic will run deep byte footprinting later
                 results["errors"].append(f"Skipped duplicate: {f}")
                 continue
                 
             try:
-                # 1. Parse filename constraints via inference engine
-                meta = engine_metadata.extract_metadata(file_path)
-                
-                # Inference provides cleaned publisher, series, issue, volume
-                # Ensure the Series exists
-                pub = meta.get("publisher", "Unknown Publisher")
-                series_name = meta.get("series", "Unknown Series")
+                # 1. Parse metadata via engine
+                # Returns: publisher, ip, storyline, issue, volume
+                pub, series_name, storyline, issue, volume = engine_metadata.extract_metadata(file_path)
                 
                 series_row = db.fetch_one("SELECT id FROM series WHERE name = ? AND publisher = ?", (series_name, pub))
                 if series_row:
@@ -63,20 +55,62 @@ def scan_and_import(source_dir: str, db):
                 
                 # Ensure Comic exists
                 comic_id = db.execute(
-                    """INSERT INTO comics (series_id, issue_number, title, volume, summary)
-                       VALUES (?, ?, ?, ?, ?)""",
-                    (series_id, meta.get('issue', ''), meta.get('title', ''), meta.get('volume', None), meta.get('summary', ''))
+                    """INSERT INTO comics (series_id, issue_number, title, volume)
+                       VALUES (?, ?, ?, ?)""",
+                    (series_id, issue, series_name, volume) # Using series_name as default title
                 )
                 
                 # Log File wrapper
                 db.execute(
                     "INSERT INTO files (comic_id, file_path, file_size, checksum, cover_page_index) VALUES (?, ?, ?, ?, ?)",
-                    (comic_id, file_path, file_size, f"basic-hash-{file_size}", 0)  # Defaulting cover page to 0
+                    (comic_id, file_path, file_size, f"basic-hash-{file_size}", 0)
                 )
                 
                 results["imported"] += 1
 
             except Exception as e:
+                print(f"  [!] Import failed for {f}: {e}")
                 results["errors"].append(f"Failed {f}: {str(e)}")
 
     return results
+
+
+def organized_import(source_dir: str, dest_dir: str, move_files: bool, db):
+    """
+    Uses the ComicSorterEngine to physically move/copy files into the 
+    library using the structured format, then indexes the results.
+    """
+    status = {
+        "success": False,
+        "summary": {},
+        "errors": []
+    }
+
+    # Setup callbacks for the engine
+    def on_finish(summary):
+        status["success"] = True
+        status["summary"] = summary
+
+    callbacks = {
+        "on_finish": on_finish,
+        "log": lambda m: print(f"[Engine] {m}")
+    }
+
+    engine = ComicSorterEngine(callbacks)
+    
+    try:
+        engine.process_comics(
+            source_dir=source_dir,
+            dest_dir=dest_dir,
+            is_move_operation=move_files,
+            mode=1,
+            dry_run=False
+        )
+        
+        # After sorting is done, we need to INDEX the destination dir to update our DB
+        scan_and_import(dest_dir, db)
+        
+    except Exception as e:
+        status["errors"].append(str(e))
+
+    return status

@@ -1,30 +1,58 @@
-import { useUIStore } from '../store'
+import React from 'react';
+import { useUIStore, useLibraryStore } from '../store';
 
-export function Sidebar() {
-  const { activePublisher, setActivePublisher, apiPort } = useUIStore()
+interface SidebarProps {
+  onOpenSettings: () => void;
+  onOpenImport: () => void;
+}
 
-  const categories = [
-    { id: 'all', label: 'All Comics', pub: null },
-    { id: 'dc', label: 'DC', pub: 'DC' },
-    { id: 'marvel', label: 'Marvel', pub: 'Marvel' },
-    { id: 'image', label: 'Image', pub: 'Image' },
-  ]
+export const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings, onOpenImport }) => {
+  const { comics } = useLibraryStore();
+  const { activePublisher, setActivePublisher, apiPort } = useUIStore();
+
+  // Extract unique publishers from comics
+  const publishers = Array.from(new Set(
+    (Array.isArray(comics) ? comics : []).map(c => c.publisher)
+  )).sort();
 
   return (
-    <div className="sidebar">
-      <h2>Comic Vault</h2>
-      {categories.map(c => (
-        <button
-          key={c.id}
-          className={`sidebar-button ${activePublisher === c.pub ? 'active' : ''}`}
-          onClick={() => setActivePublisher(c.pub)}
-        >
-          {c.label}
+    <aside className="sidebar">
+      <div className="sidebar-header">
+        <h2>Comic Vault</h2>
+        <button onClick={onOpenImport} className="btn-primary" style={{ width: '100%', marginTop: '10px' }}>
+          Import Comics
         </button>
-      ))}
-      <div style={{ marginTop: 'auto', fontSize: '0.8rem', color: '#666' }}>
-        Status: {apiPort ? `Connected (:${apiPort})` : 'Disconnected'}
       </div>
-    </div>
-  )
-}
+
+      <nav className="sidebar-nav">
+        <div 
+          className={`nav-item ${activePublisher === null ? 'active' : ''}`}
+          onClick={() => setActivePublisher(null)}
+        >
+          All Comics
+        </div>
+        
+        <div className="nav-section-title">Publishers</div>
+        {publishers.map(pub => (
+          <div 
+            key={pub} 
+            className={`nav-item ${activePublisher === pub ? 'active' : ''}`}
+            onClick={() => setActivePublisher(pub)}
+          >
+            {pub}
+          </div>
+        ))}
+      </nav>
+
+      <div className="sidebar-footer">
+        <div className="status-row">
+          <span className={`status-dot ${apiPort ? 'connected' : ''}`}></span>
+          {apiPort ? `Connected (: ${apiPort})` : 'Disconnected'}
+        </div>
+        <button onClick={onOpenSettings} className="btn-secondary" style={{ width: '100%', marginTop: '10px' }}>
+          Settings
+        </button>
+      </div>
+    </aside>
+  );
+};

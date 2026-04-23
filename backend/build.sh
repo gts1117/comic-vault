@@ -10,7 +10,12 @@ cd "$(dirname "$0")"
 source venv/bin/activate
 
 # Bundle with PyInstaller
-pyinstaller --noconfirm --onefile --console --name "api-server-$TARGET" server.py
+# Bundle with PyInstaller - include schema.sql and the engine folder as data files
+pyinstaller --noconfirm --onefile --console \
+    --name "api-server-$TARGET" \
+    --add-data "schema.sql:." \
+    --add-data "engine:engine" \
+    server.py
 
 # Move to Tauri directory
 mkdir -p ../src-tauri/binaries

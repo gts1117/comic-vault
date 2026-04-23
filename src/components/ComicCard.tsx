@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
+import { invoke } from '@tauri-apps/api/core'
 import { Comic, useUIStore } from '../store'
 
 export function ComicCard({ comic }: { comic: Comic }) {
@@ -6,17 +7,14 @@ export function ComicCard({ comic }: { comic: Comic }) {
   const [thumbUrl, setThumbUrl] = useState<string | null>(null)
   const [needsConversion, setNeedsConversion] = useState(false)
   const [isConverting, setIsConverting] = useState(false)
-
-  // Use a stable trick to force reload if conversion succeeds
   const [reloadTick, setReloadTick] = useState(0)
 
   useEffect(() => {
     if (!apiPort) return;
-    
     let isMounted = true;
     const fetchThumb = async () => {
       try {
-        const resp = await fetch(`http://localhost:${apiPort}/api/thumb/${comic.id}?t=${reloadTick}`)
+        const resp = await fetch(`http://127.0.0.1:${apiPort}/api/thumb/${comic.id}?t=${reloadTick}`)
         if (resp.status === 422) {
           if (isMounted) setNeedsConversion(true)
         } else if (resp.ok) {
@@ -32,32 +30,34 @@ export function ComicCard({ comic }: { comic: Comic }) {
       }
     }
     fetchThumb()
-    
     return () => { isMounted = false }
   }, [comic.id, apiPort, reloadTick])
 
   const handleConvert = async (e: React.MouseEvent) => {
     e.stopPropagation()
     if (!apiPort || isConverting) return;
-    
     setIsConverting(true)
     try {
-      const resp = await fetch(`http://localhost:${apiPort}/api/convert/${comic.id}`, { method: 'POST' })
-      if (resp.ok) {
-        // Force the thumbnail to fetch again now that it's a CBZ!
-        setReloadTick(t => t + 1)
-      } else {
-        alert("Conversion failed.")
-      }
-    } catch (e) {
-      console.error(e)
+      const resp = await fetch(`http://127.0.0.1:${apiPort}/api/convert/${comic.id}`, { method: 'POST' })
+      if (resp.ok) setReloadTick(t => t + 1)
     } finally {
       setIsConverting(false)
     }
   }
 
+  const handleOpen = async () => {
+    try {
+      if (comic.file_path) {
+        console.log("Opening file via Rust:", comic.file_path);
+        await invoke('open_file', { path: comic.file_path });
+      }
+    } catch (e) {
+      console.error("Failed to open file", e);
+    }
+  }
+
   return (
-    <div className="comic-card">
+    <div className="comic-card" onClick={handleOpen} title={`Open ${comic.file_path}`}>
       <div className="comic-cover">
         {thumbUrl ? (
           <img src={thumbUrl} alt={comic.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -67,7 +67,7 @@ export function ComicCard({ comic }: { comic: Comic }) {
             <button 
               onClick={handleConvert}
               disabled={isConverting}
-              style={{ padding: '8px 12px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px', cursor: isConverting ? 'wait' : 'pointer' }}
+              style={{ padding: '8px 12px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '4px' }}
             >
               {isConverting ? 'Converting...' : 'Convert to CBZ'}
             </button>
@@ -80,9 +80,7 @@ export function ComicCard({ comic }: { comic: Comic }) {
       </div>
       <div className="comic-info">
         <h3 className="comic-title">{comic.title || "Unknown Title"}</h3>
-        <p className="comic-issue">
-          {comic.series_name} #{comic.issue_number}
-        </p>
+        <p className="comic-issue">{comic.series_name} #{comic.issue_number}</p>
       </div>
     </div>
   )

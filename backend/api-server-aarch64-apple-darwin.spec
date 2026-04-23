@@ -5,7 +5,7 @@ a = Analysis(
     ['server.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('schema.sql', '.'), ('engine', 'engine')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
