@@ -10,60 +10,74 @@ export interface Slot {
 }
 
 // Manually mapped coordinates for the shelves in room_bg.png
-// Right bookcase (flatter) - 3 columns, 4 rows
-const RIGHT_SHELF_SLOTS: Slot[] = [
-  // Row 1
-  { left: '66%', top: '23%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '74.5%', top: '25.5%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '83%', top: '28%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
-  
-  // Row 2
-  { left: '66%', top: '41%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '74.5%', top: '43.5%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '83%', top: '46%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
+interface RowBounds {
+  leftTop: number;
+  rightTop: number;
+}
 
-  // Row 3
-  { left: '66%', top: '58%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '74.5%', top: '60.5%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '83%', top: '63%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
+function generateGrid(
+  leftEdge: number,
+  rightEdge: number,
+  cols: number,
+  rows: RowBounds[],
+  width: string,
+  rotateY: string,
+  skewY: string
+): Slot[] {
+  const slots: Slot[] = [];
+  for (let r = 0; r < rows.length; r++) {
+    for (let c = 0; c < cols; c++) {
+      const leftPercent = cols <= 1 ? leftEdge : leftEdge + (rightEdge - leftEdge) * (c / (cols - 1));
+      const topPercent = cols <= 1 ? rows[r].leftTop : rows[r].leftTop + (rows[r].rightTop - rows[r].leftTop) * (c / (cols - 1));
+      slots.push({
+        left: `${leftPercent.toFixed(1)}%`,
+        top: `${topPercent.toFixed(1)}%`,
+        width,
+        rotateY,
+        skewY
+      });
+    }
+  }
+  return slots;
+}
 
-  // Row 4
-  { left: '66%', top: '76%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '74.5%', top: '78.5%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
-  { left: '83%', top: '81%', width: '8.5%', rotateY: '0deg', skewY: '0deg' },
-];
+const RIGHT_SHELF_SLOTS = generateGrid(
+  72.2, 87.4, 3,
+  [
+    { leftTop: 20.0, rightTop: 25.9 },
+    { leftTop: 33.8, rightTop: 39.1 },
+    { leftTop: 47.4, rightTop: 54.2 },
+    { leftTop: 58.5, rightTop: 66.3 },
+    { leftTop: 71.8, rightTop: 81.0 }
+  ],
+  '8.5%', '0deg', '0deg'
+);
 
-// Middle bookcase (angled) - 4 columns, 3 rows (starting on the 3rd physical shelf)
-const MIDDLE_SHELF_SLOTS: Slot[] = [
-  // Row 1
-  { left: '39%', top: '30.5%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-  { left: '45%', top: '34%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-  { left: '51%', top: '37.5%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-  { left: '57%', top: '41%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-  
-  // Row 2
-  { left: '39%', top: '44.5%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-  { left: '45%', top: '48%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-  { left: '51%', top: '51.5%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-  { left: '57%', top: '55%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-  
-  // Row 3
-  { left: '39%', top: '58.5%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-  { left: '45%', top: '62%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-  { left: '51%', top: '65.5%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-  { left: '57%', top: '69%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
-];
+const MIDDLE_SHELF_SLOTS = generateGrid(
+  44.5, 63.1, 4,
+  [
+    { leftTop: 8.0, rightTop: 15.2 },
+    { leftTop: 20.3, rightTop: 29.3 },
+    { leftTop: 34.5, rightTop: 42.0 },
+    { leftTop: 47.6, rightTop: 54.7 },
+    { leftTop: 60.9, rightTop: 67.9 }
+  ],
+  '6.5%', '25deg', '-4deg'
+);
 
-// Generic spawn points on the floor for unarranged boxes
-const FLOOR_SLOTS: Slot[] = Array.from({ length: 6 }).map((_, i) => ({
-  left: `${40 + i * 5}%`,
-  top: '85%',
-  width: '6.5%',
-  rotateY: '0deg',
-  skewY: '0deg'
-}));
+const LEFT_SHELF_SLOTS = generateGrid(
+  12.5, 31.2, 4,
+  [
+    { leftTop: 13.7, rightTop: 6.8 },
+    { leftTop: 27.1, rightTop: 18.1 },
+    { leftTop: 40.7, rightTop: 31.8 },
+    { leftTop: 53.4, rightTop: 44.9 },
+    { leftTop: 64.3, rightTop: 58.8 }
+  ],
+  '6.5%', '-25deg', '4deg'
+);
 
-const INITIAL_SLOTS = [...RIGHT_SHELF_SLOTS, ...MIDDLE_SHELF_SLOTS, ...FLOOR_SLOTS];
+const INITIAL_SLOTS = [...LEFT_SHELF_SLOTS, ...MIDDLE_SHELF_SLOTS, ...RIGHT_SHELF_SLOTS];
 
 interface BoxData {
   id: string;
