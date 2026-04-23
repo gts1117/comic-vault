@@ -54,7 +54,16 @@ const MIDDLE_SHELF_SLOTS: Slot[] = [
   { left: '57%', top: '69%', width: '6.5%', rotateY: '25deg', skewY: '-4deg' },
 ];
 
-const INITIAL_SLOTS = [...RIGHT_SHELF_SLOTS, ...MIDDLE_SHELF_SLOTS];
+// Generic spawn points on the floor for unarranged boxes
+const FLOOR_SLOTS: Slot[] = Array.from({ length: 6 }).map((_, i) => ({
+  left: `${40 + i * 5}%`,
+  top: '85%',
+  width: '6.5%',
+  rotateY: '0deg',
+  skewY: '0deg'
+}));
+
+const INITIAL_SLOTS = [...RIGHT_SHELF_SLOTS, ...MIDDLE_SHELF_SLOTS, ...FLOOR_SLOTS];
 
 interface BoxData {
   id: string;

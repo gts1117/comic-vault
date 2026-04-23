@@ -4,12 +4,13 @@ import { SettingsModal } from './components/SettingsModal'
 import { ImportModal } from './components/ImportModal'
 import { Reader } from './components/Reader'
 import { useBackend } from './hooks/useBackend'
-import { useUIStore } from './store'
+import { useUIStore, useLibraryStore } from './store'
 import './App.css'
 
 function App() {
   useBackend()
   const { libraryPath, activeComicId, setActiveComicId } = useUIStore()
+  const { comics } = useLibraryStore()
   
   const [showSettings, setShowSettings] = useState(false)
   const [showImport, setShowImport] = useState(false)
@@ -37,11 +38,25 @@ function App() {
             { id: '16', label: 'FLASH' },
             { id: '17', label: 'GREEN LANTERN' },
             { id: '18', label: 'WONDER WOMAN' },
+            { id: '19', label: 'BOX 19' },
+            { id: '20', label: 'BOX 20' },
+            { id: '21', label: 'BOX 21' },
+            { id: '22', label: 'BOX 22' },
+            { id: '23', label: 'BOX 23' },
+            { id: '24', label: 'BOX 24' },
+            { id: '25', label: 'BOX 25' },
+            { id: '26', label: 'BOX 26' },
+            { id: '27', label: 'BOX 27' },
+            { id: '28', label: 'BOX 28' },
+            { id: '29', label: 'BOX 29' },
+            { id: '30', label: 'BOX 30' },
           ]}
           onBoxClick={(box) => {
-            // For now, mock clicking a box to open a comic. 
-            // In reality this would open a sub-menu for the box, but we'll wire it directly to a comic for testing the reader.
-            setActiveComicId(1)
+            if (comics && comics.length > 0) {
+              setActiveComicId(comics[0].id)
+            } else {
+              console.warn('No comics loaded in library yet!')
+            }
           }}
         />
         
