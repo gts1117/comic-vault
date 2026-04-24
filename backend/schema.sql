@@ -68,3 +68,12 @@ INSERT OR IGNORE INTO settings (key, value) VALUES ('library_path', NULL);
 CREATE INDEX IF NOT EXISTS idx_series_name ON series(name);
 CREATE INDEX IF NOT EXISTS idx_comics_series ON comics(series_id);
 CREATE INDEX IF NOT EXISTS idx_files_comic ON files(comic_id);
+
+-- 7. Custom Boxes: Physical shelf placement rules
+CREATE TABLE IF NOT EXISTS custom_boxes (
+    id TEXT PRIMARY KEY,
+    label TEXT NOT NULL,
+    rule_type TEXT NOT NULL,
+    rule_value TEXT NOT NULL,
+    slot_idx INTEGER UNIQUE
+);

@@ -120,6 +120,18 @@ def get_thumb(comic_id: int):
         # If it's a CBR, it returns False. 422 triggers Frontend to show Convert Button.
         raise HTTPException(status_code=422, detail="Needs Conversion")
 
+@app.post("/api/boxes/sync")
+def sync_boxes(assignments: dict[str, int | None]):
+    from fastapi import HTTPException
+    try:
+        db.execute("UPDATE custom_boxes SET slot_idx = NULL")
+        for box_id, slot_idx in assignments.items():
+            if slot_idx is not None:
+                db.execute("UPDATE custom_boxes SET slot_idx = ? WHERE id = ?", (slot_idx, box_id))
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/comic/{comic_id}/read")
 def get_comic_read_status(comic_id: int):
     from fastapi import HTTPException
@@ -264,6 +276,62 @@ def trigger_organized_import(req: OrganizedImportRequest):
     import api_import
     results = api_import.organized_import(req.source_dir, dest_dir, req.mode == "move", db)
     return results
+
+class CustomBox(BaseModel):
+    label: str
+    rule_type: str
+    rule_value: str
+    slot_idx: int | None = None
+
+@app.get("/api/boxes")
+def get_boxes():
+    rows = db.fetch_all("SELECT * FROM custom_boxes")
+    return [dict(r) for r in rows]
+
+@app.post("/api/boxes")
+def create_box(box: CustomBox):
+    import uuid
+    box_id = str(uuid.uuid4())
+    db.execute(
+        "INSERT INTO custom_boxes (id, label, rule_type, rule_value, slot_idx) VALUES (?, ?, ?, ?, ?)",
+        (box_id, box.label, box.rule_type, box.rule_value, box.slot_idx)
+    )
+    return {"status": "ok", "id": box_id}
+
+@app.delete("/api/boxes/{box_id}")
+def delete_box(box_id: str):
+    db.execute("DELETE FROM custom_boxes WHERE id = ?", (box_id,))
+    return {"status": "ok"}
+
+@app.get("/api/boxes/{box_id}/contents")
+def get_box_contents(box_id: str):
+    from fastapi import HTTPException
+    box = db.fetch_one("SELECT * FROM custom_boxes WHERE id = ?", (box_id,))
+    if not box:
+        raise HTTPException(status_code=404, detail="Box not found")
+        
+    rule_type = box['rule_type']
+    rule_value = box['rule_value']
+    
+    base_query = '''
+        SELECT c.id, c.title, c.issue_number, s.name as series_name, s.publisher, f.file_path
+        FROM comics c
+        JOIN series s ON c.series_id = s.id
+        JOIN files f ON f.comic_id = c.id
+    '''
+    
+    params = ()
+    if rule_type == 'publisher':
+        base_query += " WHERE s.publisher = ?"
+        params = (rule_value,)
+    elif rule_type == 'series':
+        base_query += " WHERE s.name = ?"
+        params = (rule_value,)
+    
+    base_query += " ORDER BY s.publisher, s.name, c.issue_number"
+    
+    rows = db.fetch_all(base_query, params)
+    return [dict(r) for r in rows]
 
 def get_free_port():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
