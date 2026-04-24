@@ -52,7 +52,7 @@ const RIGHT_SHELF_SLOTS = generateGrid(
     { leftTop: 58.5, rightTop: 66.3 },
     { leftTop: 71.8, rightTop: 81.0 }
   ],
-  '10.5%', '0deg', '0deg', false
+  '14.5%', '0deg', '0deg', false
 );
 
 const MIDDLE_SHELF_SLOTS = generateGrid(
@@ -64,7 +64,7 @@ const MIDDLE_SHELF_SLOTS = generateGrid(
     { leftTop: 47.6, rightTop: 54.7 },
     { leftTop: 60.9, rightTop: 67.9 }
   ],
-  '8.5%', '25deg', '-4deg', false
+  '11.5%', '25deg', '-4deg', false
 );
 
 const LEFT_SHELF_SLOTS = generateGrid(
@@ -76,7 +76,7 @@ const LEFT_SHELF_SLOTS = generateGrid(
     { leftTop: 53.4, rightTop: 44.9 },
     { leftTop: 64.3, rightTop: 58.8 }
   ],
-  '8.5%', '-25deg', '4deg', true
+  '11.5%', '-25deg', '4deg', true
 );
 
 const INITIAL_SLOTS = [...LEFT_SHELF_SLOTS, ...MIDDLE_SHELF_SLOTS, ...RIGHT_SHELF_SLOTS];
@@ -207,7 +207,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
               top: INITIAL_SLOTS[hoveredSlotIdx].top,
               width: INITIAL_SLOTS[hoveredSlotIdx].width,
               height: '14%', // approximate height of box
-              transform: `perspective(1000px) rotateY(${INITIAL_SLOTS[hoveredSlotIdx].rotateY}) skewY(${INITIAL_SLOTS[hoveredSlotIdx].skewY}) translate(-50%, -50%)`,
+              transform: `perspective(1000px) rotateY(${INITIAL_SLOTS[hoveredSlotIdx].rotateY}) skewY(${INITIAL_SLOTS[hoveredSlotIdx].skewY}) translate(-50%, -60%)`,
               backgroundColor: 'rgba(255, 255, 255, 0.3)',
               border: '2px dashed rgba(255,255,255,0.8)',
               borderRadius: '4px',
@@ -254,7 +254,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
                 left,
                 top,
                 width,
-                transform: `perspective(1000px) rotateY(${rotateY}) skewY(${skewY}) translate(-50%, -50%)`,
+                transform: `perspective(1000px) rotateY(${rotateY}) skewY(${skewY}) translate(-50%, -60%)`,
                 cursor: editMode ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
                 transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
                 zIndex: isDragging ? 1000 : undefined
