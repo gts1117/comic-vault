@@ -512,3 +512,31 @@ body {
   padding-top: 20px;
   border-top: 1px solid var(--border-color);
 }
+
+/* Archive Book Interaction */
+.archive-book-trigger {
+  position: absolute;
+  /* Uncomment to debug click area positioning: */
+  /* background: rgba(255, 0, 0, 0.4); */
+  /* border: 1px solid red; */
+}
+
+.archive-book-trigger::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0);
+  transform-origin: left center;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s ease;
+  pointer-events: none;
+  border-radius: 2px 5px 5px 2px;
+}
+
+.archive-book-trigger:hover::after {
+  transform: rotateY(-130deg);
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: -5px 0 15px rgba(0,0,0,0.8);
+}
