@@ -1,15 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import boxImg from '../assets/box.png';
+import { useLibraryStore } from '../store';
+import { BoxConfigModal } from './BoxConfigModal';
 
-export interface Slot {
-  left: string;
-  top: string;
-  width: string;
-  rotateY: string;
-  skewY: string;
-}
-
-// Manually mapped coordinates for the shelves in room_bg.png
 interface RowBounds {
   leftTop: number;
   rightTop: number;
@@ -107,29 +100,92 @@ const FLOOR_SLOTS: Slot[] = Array.from({ length: 6 }).map((_, i) => ({
 
 const INITIAL_SLOTS = [...LEFT_SHELF_SLOTS, ...MIDDLE_SHELF_SLOTS, ...RIGHT_SHELF_SLOTS, ...FLOOR_SLOTS];
 
-interface BoxData {
+export interface BoxData {
   id: string;
   label: string;
+  rule_type: string;
+  rule_value: string;
+  slot_idx: number | null;
 }
 
 interface ShelfOverlayProps {
-  boxes: BoxData[];
   onBoxClick: (box: BoxData) => void;
 }
 
-export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick }) => {
-  // assignments maps box.id to an index in INITIAL_SLOTS
-  const [assignments, setAssignments] = useState<Record<string, number>>(() => {
-    const initial: Record<string, number> = {};
-    boxes.forEach((box, idx) => {
-      if (idx < INITIAL_SLOTS.length) {
-        initial[box.id] = idx;
-      }
-    });
-    return initial;
-  });
-
+export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
+  const { apiPort } = useLibraryStore();
+  const [boxes, setBoxes] = useState<BoxData[]>([]);
+  const [assignments, setAssignments] = useState<Record<string, number>>({});
+  
+  const [showConfigModal, setShowConfigModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  
+  // Fetch boxes on mount
+  const loadBoxes = async () => {
+    if (!apiPort) return;
+    try {
+      const res = await fetch(`http://localhost:${apiPort}/api/boxes`);
+      const data: BoxData[] = await res.json();
+      setBoxes(data);
+      
+      const initialAssign: Record<string, number> = {};
+      data.forEach(box => {
+        if (box.slot_idx !== null && box.slot_idx < INITIAL_SLOTS.length) {
+          initialAssign[box.id] = box.slot_idx;
+        }
+      });
+      setAssignments(initialAssign);
+    } catch (e) {
+      console.error("Failed to load boxes", e);
+    }
+  };
+
+  useEffect(() => {
+    loadBoxes();
+  }, [apiPort]);
+
+  const syncAssignments = async (newAssign: Record<string, number>) => {
+    if (!apiPort) return;
+    try {
+      await fetch(`http://localhost:${apiPort}/api/boxes/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAssign)
+      });
+    } catch (e) {
+      console.error("Failed to sync assignments", e);
+    }
+  };
+
+  const handleCreateBox = async (config: { label: string, rule_type: string, rule_value: string }) => {
+    if (!apiPort) return;
+    
+    // Find next available floor slot
+    const takenSlots = new Set(Object.values(assignments));
+    const floorStartIndex = INITIAL_SLOTS.length - FLOOR_SLOTS.length;
+    let targetSlot = null;
+    
+    for (let i = floorStartIndex; i < INITIAL_SLOTS.length; i++) {
+      if (!takenSlots.has(i)) {
+        targetSlot = i;
+        break;
+      }
+    }
+    
+    try {
+      const res = await fetch(`http://localhost:${apiPort}/api/boxes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...config, slot_idx: targetSlot })
+      });
+      if (res.ok) {
+        setShowConfigModal(false);
+        loadBoxes(); // Reload to get the new box ID and update state
+      }
+    } catch (e) {
+      console.error("Failed to create box", e);
+    }
+  };
   const [draggingBoxId, setDraggingBoxId] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const [hoveredSlotIdx, setHoveredSlotIdx] = useState<number | null>(null);
@@ -200,6 +256,8 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
              delete newAssign[previousOccupantId];
           }
           
+          
+          syncAssignments(newAssign);
           return newAssign;
         });
       }
@@ -207,12 +265,6 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
       setMousePos(null);
       setHoveredSlotIdx(null);
     }
-  };
-
-  const exportCoordinates = () => {
-    const json = JSON.stringify(assignments, null, 2);
-    navigator.clipboard.writeText(json);
-    alert("Box assignments copied to clipboard! Paste them to Antigravity.");
   };
 
   return (
@@ -309,11 +361,18 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
           {editMode ? 'Finish Editing' : '🛠️ Edit Box Layout'}
         </button>
         {editMode && (
-          <button className="hud-btn" onClick={exportCoordinates}>
-            📋 Copy JSON
+          <button className="hud-btn" onClick={() => setShowConfigModal(true)}>
+            📦 Add New Box
           </button>
         )}
       </div>
+      
+      {showConfigModal && (
+        <BoxConfigModal 
+          onClose={() => setShowConfigModal(false)}
+          onSave={handleCreateBox}
+        />
+      )}
     </>
   );
 };

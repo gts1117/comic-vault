@@ -21,38 +21,6 @@ function App() {
     <div className="app-container">
       <div className="room-stage">
         <ShelfOverlay 
-          boxes={[
-            { id: '1', label: 'X-MEN' },
-            { id: '2', label: 'SPIDER-MAN' },
-            { id: '3', label: 'BATMAN' },
-            { id: '4', label: 'AVENGERS' },
-            { id: '5', label: 'IMAGE COMICS' },
-            { id: '6', label: 'VERTIGO' },
-            { id: '7', label: 'DARK HORSE' },
-            { id: '8', label: 'IDW' },
-            { id: '9', label: 'BOOM!' },
-            { id: '10', label: 'VALIANT' },
-            { id: '11', label: 'MANGA' },
-            { id: '12', label: 'INDIE' },
-            { id: '13', label: 'ACTION COMICS' },
-            { id: '14', label: 'DETECTIVE' },
-            { id: '15', label: 'SUPERMAN' },
-            { id: '16', label: 'FLASH' },
-            { id: '17', label: 'GREEN LANTERN' },
-            { id: '18', label: 'JUSTICE LEAGUE' },
-            { id: '19', label: 'WONDER WOMAN' },
-            { id: '20', label: 'AQUAMAN' },
-            { id: '21', label: 'DAREDEVIL' },
-            { id: '22', label: 'PUNISHER' },
-            { id: '23', label: 'FANTASTIC FOUR' },
-            { id: '24', label: 'IRON MAN' },
-            { id: '25', label: 'THOR' },
-            { id: '26', label: 'HULK' },
-            { id: '27', label: 'CAPTAIN AMERICA' },
-            { id: '28', label: 'BOX 28' },
-            { id: '29', label: 'BOX 29' },
-            { id: '30', label: 'BOX 30' },
-          ]}
           onBoxClick={(box) => {
             if (comics && comics.length > 0) {
               setActiveComicId(comics[0].id)
