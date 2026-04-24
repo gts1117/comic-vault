@@ -15,6 +15,16 @@ interface RowBounds {
   rightTop: number;
 }
 
+export interface Slot {
+  left: string;
+  top: string;
+  width: string;
+  rotateY: string;
+  skewY: string;
+  flipImage: boolean;
+  baseZ: number;
+}
+
 function generateGrid(
   leftEdge: number,
   rightEdge: number,
@@ -23,20 +33,25 @@ function generateGrid(
   width: string,
   rotateY: string,
   skewY: string,
-  flipImage: boolean = false
+  flipImage: boolean = false,
+  reverseZ: boolean = false
 ): Slot[] {
   const slots: Slot[] = [];
   for (let r = 0; r < rows.length; r++) {
     for (let c = 0; c < cols; c++) {
       const leftPercent = cols <= 1 ? leftEdge : leftEdge + (rightEdge - leftEdge) * (c / (cols - 1));
       const topPercent = cols <= 1 ? rows[r].leftTop : rows[r].leftTop + (rows[r].rightTop - rows[r].leftTop) * (c / (cols - 1));
+      
+      const baseZ = reverseZ ? (cols - c) : c;
+
       slots.push({
         left: `${leftPercent.toFixed(1)}%`,
         top: `${topPercent.toFixed(1)}%`,
         width,
         rotateY,
         skewY,
-        flipImage
+        flipImage,
+        baseZ
       });
     }
   }
@@ -52,7 +67,7 @@ const RIGHT_SHELF_SLOTS = generateGrid(
     { leftTop: 58.5, rightTop: 66.3 },
     { leftTop: 71.8, rightTop: 81.0 }
   ],
-  '14.5%', '0deg', '0deg', false
+  '14.5%', '0deg', '0deg', false, false
 );
 
 const MIDDLE_SHELF_SLOTS = generateGrid(
@@ -64,7 +79,7 @@ const MIDDLE_SHELF_SLOTS = generateGrid(
     { leftTop: 47.6, rightTop: 54.7 },
     { leftTop: 60.9, rightTop: 67.9 }
   ],
-  '11.5%', '25deg', '-4deg', false
+  '11.5%', '25deg', '-4deg', false, false
 );
 
 const LEFT_SHELF_SLOTS = generateGrid(
@@ -76,10 +91,21 @@ const LEFT_SHELF_SLOTS = generateGrid(
     { leftTop: 53.4, rightTop: 44.9 },
     { leftTop: 64.3, rightTop: 58.8 }
   ],
-  '11.5%', '-25deg', '4deg', true
+  '11.5%', '-25deg', '4deg', true, true
 );
 
-const INITIAL_SLOTS = [...LEFT_SHELF_SLOTS, ...MIDDLE_SHELF_SLOTS, ...RIGHT_SHELF_SLOTS];
+// Generic spawn points on the floor for unarranged boxes
+const FLOOR_SLOTS: Slot[] = Array.from({ length: 6 }).map((_, i) => ({
+  left: `${40 + i * 5}%`,
+  top: '85%',
+  width: '11.5%',
+  rotateY: '0deg',
+  skewY: '0deg',
+  flipImage: false,
+  baseZ: i
+}));
+
+const INITIAL_SLOTS = [...LEFT_SHELF_SLOTS, ...MIDDLE_SHELF_SLOTS, ...RIGHT_SHELF_SLOTS, ...FLOOR_SLOTS];
 
 interface BoxData {
   id: string;
@@ -223,7 +249,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
           
           if (slotIdx === undefined && !isDragging) return null;
           
-          let left, top, width, rotateY, skewY, flipImage;
+          let left, top, width, rotateY, skewY, flipImage, baseZ;
           
           if (isDragging && mousePos) {
             left = `${mousePos.x}%`;
@@ -234,6 +260,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
             rotateY = sourceSlot.rotateY;
             skewY = sourceSlot.skewY;
             flipImage = sourceSlot.flipImage;
+            baseZ = 1000;
           } else {
             const slot = INITIAL_SLOTS[slotIdx!];
             left = slot.left;
@@ -242,6 +269,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
             rotateY = slot.rotateY;
             skewY = slot.skewY;
             flipImage = slot.flipImage;
+            baseZ = slot.baseZ;
           }
           
           return (
@@ -257,7 +285,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
                 transform: `perspective(1000px) rotateY(${rotateY}) skewY(${skewY}) translate(-50%, -60%)`,
                 cursor: editMode ? (isDragging ? 'grabbing' : 'grab') : 'pointer',
                 transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                zIndex: isDragging ? 1000 : undefined
+                zIndex: isDragging ? 1000 : baseZ
               }}
             >
               <div className="box-inner" style={flipImage ? { transform: 'scaleX(-1)' } : undefined}>
