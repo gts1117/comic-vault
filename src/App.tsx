@@ -4,6 +4,8 @@ import { SettingsModal } from './components/SettingsModal'
 import { ImportModal } from './components/ImportModal'
 import { Reader } from './components/Reader'
 import { ArchiveView } from './components/ArchiveView'
+import { BoxDetailView } from './components/BoxDetailView'
+import { BoxData } from './components/ShelfOverlay'
 import { useBackend } from './hooks/useBackend'
 import { useUIStore, useLibraryStore } from './store'
 import './App.css'
@@ -16,17 +18,14 @@ function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [showArchive, setShowArchive] = useState(false)
+  const [activeBox, setActiveBox] = useState<BoxData | null>(null)
 
   return (
     <div className="app-container">
       <div className="room-stage">
         <ShelfOverlay 
           onBoxClick={(box) => {
-            if (comics && comics.length > 0) {
-              setActiveComicId(comics[0].id)
-            } else {
-              console.warn('No comics loaded in library yet!')
-            }
+            setActiveBox(box);
           }}
         />
         
@@ -69,6 +68,15 @@ function App() {
           onSelectComic={(id) => {
             setActiveComicId(id);
             setShowArchive(false);
+          }} 
+        />
+      )}
+      {activeBox && (
+        <BoxDetailView 
+          box={activeBox} 
+          onClose={() => setActiveBox(null)} 
+          onSelectComic={(id) => {
+            setActiveComicId(id);
           }} 
         />
       )}
