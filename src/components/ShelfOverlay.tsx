@@ -22,7 +22,8 @@ function generateGrid(
   rows: RowBounds[],
   width: string,
   rotateY: string,
-  skewY: string
+  skewY: string,
+  flipImage: boolean = false
 ): Slot[] {
   const slots: Slot[] = [];
   for (let r = 0; r < rows.length; r++) {
@@ -34,7 +35,8 @@ function generateGrid(
         top: `${topPercent.toFixed(1)}%`,
         width,
         rotateY,
-        skewY
+        skewY,
+        flipImage
       });
     }
   }
@@ -50,7 +52,7 @@ const RIGHT_SHELF_SLOTS = generateGrid(
     { leftTop: 58.5, rightTop: 66.3 },
     { leftTop: 71.8, rightTop: 81.0 }
   ],
-  '8.5%', '0deg', '0deg'
+  '10.5%', '0deg', '0deg', false
 );
 
 const MIDDLE_SHELF_SLOTS = generateGrid(
@@ -62,7 +64,7 @@ const MIDDLE_SHELF_SLOTS = generateGrid(
     { leftTop: 47.6, rightTop: 54.7 },
     { leftTop: 60.9, rightTop: 67.9 }
   ],
-  '6.5%', '25deg', '-4deg'
+  '8.5%', '25deg', '-4deg', false
 );
 
 const LEFT_SHELF_SLOTS = generateGrid(
@@ -74,7 +76,7 @@ const LEFT_SHELF_SLOTS = generateGrid(
     { leftTop: 53.4, rightTop: 44.9 },
     { leftTop: 64.3, rightTop: 58.8 }
   ],
-  '6.5%', '-25deg', '4deg'
+  '8.5%', '-25deg', '4deg', true
 );
 
 const INITIAL_SLOTS = [...LEFT_SHELF_SLOTS, ...MIDDLE_SHELF_SLOTS, ...RIGHT_SHELF_SLOTS];
@@ -221,7 +223,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
           
           if (slotIdx === undefined && !isDragging) return null;
           
-          let left, top, width, rotateY, skewY;
+          let left, top, width, rotateY, skewY, flipImage;
           
           if (isDragging && mousePos) {
             left = `${mousePos.x}%`;
@@ -231,6 +233,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
             width = sourceSlot.width;
             rotateY = sourceSlot.rotateY;
             skewY = sourceSlot.skewY;
+            flipImage = sourceSlot.flipImage;
           } else {
             const slot = INITIAL_SLOTS[slotIdx!];
             left = slot.left;
@@ -238,6 +241,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
             width = slot.width;
             rotateY = slot.rotateY;
             skewY = slot.skewY;
+            flipImage = slot.flipImage;
           }
           
           return (
@@ -256,10 +260,10 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ boxes, onBoxClick })
                 zIndex: isDragging ? 1000 : undefined
               }}
             >
-              <div className="box-inner">
+              <div className="box-inner" style={flipImage ? { transform: 'scaleX(-1)' } : undefined}>
                 <img src={boxImg} className="box-image" alt="Comic Box" draggable={false} />
                 <div className="box-label">
-                  <span>{box.label}</span>
+                  <span style={flipImage ? { transform: 'scaleX(-1)', display: 'block' } : undefined}>{box.label}</span>
                 </div>
               </div>
             </div>
