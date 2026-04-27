@@ -33,7 +33,9 @@ function App() {
         <div 
           className="archive-book-trigger"
           onClick={() => setShowArchive(true)}
-        />
+        >
+          <div className="page"></div>
+        </div>
 
         {!libraryPath && (
           <div className="welcome-state" style={{ position: 'absolute', zIndex: 200, background: 'rgba(0,0,0,0.8)', width: '100%', height: '100%' }}>
