@@ -1,5 +1,21 @@
 import React, { useState } from 'react';
 
+const Input = ({ label, value, onChange, min, max, step = 1 }: any) => (
+  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '11px' }}>
+    <span style={{ width: '80px' }}>{label}</span>
+    <input 
+      type="range" 
+      min={min} 
+      max={max} 
+      step={step} 
+      value={value} 
+      onChange={e => onChange(parseFloat(e.target.value))} 
+      style={{ width: '100px' }} 
+    />
+    <span style={{ width: '30px', textAlign: 'right' }}>{value}</span>
+  </div>
+);
+
 export const BookCalibration: React.FC = () => {
   const [container, setContainer] = useState({
     left: 40,
@@ -73,14 +89,6 @@ export const BookCalibration: React.FC = () => {
     navigator.clipboard.writeText(css);
     alert('CSS copied to clipboard!');
   };
-
-  const Input = ({ label, value, onChange, min, max, step = 1 }: any) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '11px' }}>
-      <span style={{ width: '80px' }}>{label}</span>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(parseFloat(e.target.value))} style={{ width: '100px' }} />
-      <span style={{ width: '30px', textAlign: 'right' }}>{value}</span>
-    </div>
-  );
 
   return (
     <>
