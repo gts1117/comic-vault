@@ -33,18 +33,6 @@ function App() {
         <div 
           className="archive-book-trigger"
           onClick={() => setShowArchive(true)}
-          style={{
-            position: 'absolute',
-            bottom: '12%',
-            left: '26%',
-            width: '15%',
-            height: '10%',
-            cursor: 'pointer',
-            zIndex: 100,
-            transform: 'perspective(500px) rotateX(60deg) rotateZ(10deg)',
-            pointerEvents: 'auto',
-            background: 'rgba(255,255,255,0.01)'
-          }}
         />
 
         {!libraryPath && (

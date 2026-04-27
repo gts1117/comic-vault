@@ -218,16 +218,20 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
     let minDistance = Infinity;
     let closestIdx = -1;
     
-    INITIAL_SLOTS.forEach((slot, idx) => {
+    // Only snap to shelf slots, not floor slots
+    const SHELF_SLOTS_COUNT = INITIAL_SLOTS.length - FLOOR_SLOTS.length;
+    
+    for (let i = 0; i < SHELF_SLOTS_COUNT; i++) {
+      const slot = INITIAL_SLOTS[i];
       const slotX = parseFloat(slot.left);
       const slotY = parseFloat(slot.top);
       const dist = Math.sqrt(Math.pow(xPercent - slotX, 2) + Math.pow(yPercent - slotY, 2));
       
       if (dist < minDistance) {
         minDistance = dist;
-        closestIdx = idx;
+        closestIdx = i;
       }
-    });
+    }
 
     // Snap distance threshold (in percentage)
     if (minDistance < 8) {
@@ -258,6 +262,29 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
           
           
           syncAssignments(newAssign);
+          return newAssign;
+        });
+      } else if (mousePos) {
+        // If dropped outside shelf, move it back to the floor
+        setAssignments(prev => {
+          const newAssign = { ...prev };
+          const oldSlotIdx = newAssign[draggingBoxId];
+          const SHELF_SLOTS_COUNT = INITIAL_SLOTS.length - FLOOR_SLOTS.length;
+          
+          if (oldSlotIdx !== undefined && oldSlotIdx < SHELF_SLOTS_COUNT) {
+            const takenSlots = new Set(Object.values(newAssign));
+            let targetSlot = null;
+            for (let i = SHELF_SLOTS_COUNT; i < INITIAL_SLOTS.length; i++) {
+              if (!takenSlots.has(i)) {
+                targetSlot = i;
+                break;
+              }
+            }
+            if (targetSlot !== null) {
+              newAssign[draggingBoxId] = targetSlot;
+              syncAssignments(newAssign);
+            }
+          }
           return newAssign;
         });
       }
