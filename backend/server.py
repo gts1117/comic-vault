@@ -120,8 +120,10 @@ def get_thumb(comic_id: int):
         # If it's a CBR, it returns False. 422 triggers Frontend to show Convert Button.
         raise HTTPException(status_code=422, detail="Needs Conversion")
 
+from typing import Optional
+
 @app.post("/api/boxes/sync")
-def sync_boxes(assignments: dict[str, int | None]):
+def sync_boxes(assignments: dict[str, Optional[int]]):
     from fastapi import HTTPException
     try:
         db.execute("UPDATE custom_boxes SET slot_idx = NULL")
@@ -281,7 +283,7 @@ class CustomBox(BaseModel):
     label: str
     rule_type: str
     rule_value: str
-    slot_idx: int | None = None
+    slot_idx: Optional[int] = None
 
 @app.get("/api/boxes")
 def get_boxes():
