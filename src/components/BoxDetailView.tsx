@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLibraryStore } from '../store';
+import { useUIStore } from '../store';
 import { BoxData } from './ShelfOverlay';
 import { Comic } from '../store';
 
@@ -10,7 +10,7 @@ interface BoxDetailViewProps {
 }
 
 export const BoxDetailView: React.FC<BoxDetailViewProps> = ({ box, onClose, onSelectComic }) => {
-  const { apiPort } = useLibraryStore();
+  const { apiPort } = useUIStore();
   const [contents, setContents] = useState<Comic[]>([]);
   const [loading, setLoading] = useState(true);
 

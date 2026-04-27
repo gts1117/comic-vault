@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import boxImg from '../assets/box.png';
-import { useLibraryStore } from '../store';
+import { useLibraryStore, useUIStore } from '../store';
 import { BoxConfigModal } from './BoxConfigModal';
 
 interface RowBounds {
@@ -113,7 +113,7 @@ interface ShelfOverlayProps {
 }
 
 export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
-  const { apiPort } = useLibraryStore();
+  const { apiPort } = useUIStore();
   const [boxes, setBoxes] = useState<BoxData[]>([]);
   const [assignments, setAssignments] = useState<Record<string, number>>({});
   

@@ -35,13 +35,15 @@ function App() {
           onClick={() => setShowArchive(true)}
           style={{
             position: 'absolute',
-            bottom: '15%',
-            left: '28%',
-            width: '12%',
-            height: '8%',
+            bottom: '12%',
+            left: '26%',
+            width: '15%',
+            height: '10%',
             cursor: 'pointer',
-            zIndex: 50,
+            zIndex: 100,
             transform: 'perspective(500px) rotateX(60deg) rotateZ(10deg)',
+            pointerEvents: 'auto',
+            background: 'rgba(255,255,255,0.01)'
           }}
         />
 

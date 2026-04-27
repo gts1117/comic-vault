@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useLibraryStore } from '../store';
+import { useLibraryStore, useUIStore } from '../store';
 import { invoke } from '@tauri-apps/api/core';
 
 interface ArchiveViewProps {
   onClose: () => void;
-  onSelectComic: (comicId: int) => void;
+  onSelectComic: (comicId: number) => void;
 }
 
 export const ArchiveView: React.FC<ArchiveViewProps> = ({ onClose, onSelectComic }) => {
-  const { comics, apiPort } = useLibraryStore();
+  const { comics } = useLibraryStore();
+  const { apiPort } = useUIStore();
   const [filter, setFilter] = useState('');
   
   const filteredComics = comics.filter(c => 

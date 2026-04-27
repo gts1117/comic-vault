@@ -13,15 +13,18 @@ export const BoxConfigModal: React.FC<BoxConfigModalProps> = ({ onClose, onSave 
   const [ruleType, setRuleType] = useState('publisher');
   const [ruleValue, setRuleValue] = useState('');
 
+  const [errorMsg, setErrorMsg] = useState('');
+
   // Extract unique options from loaded comics
   const publishers = Array.from(new Set(comics.map(c => c.publisher).filter(Boolean))).sort();
   const seriesList = Array.from(new Set(comics.map(c => c.series_name).filter(Boolean))).sort();
 
   const handleSave = () => {
     if (!label || !ruleValue) {
-      alert("Please fill out all fields.");
+      setErrorMsg("Please fill out all fields.");
       return;
     }
+    setErrorMsg('');
     onSave({ label, rule_type: ruleType, rule_value: ruleValue });
   };
 
@@ -84,7 +87,18 @@ export const BoxConfigModal: React.FC<BoxConfigModalProps> = ({ onClose, onSave 
             {ruleType === 'publisher' && publishers.map(p => <option key={p} value={p}>{p}</option>)}
             {ruleType === 'series' && seriesList.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
+          {publishers.length === 0 && seriesList.length === 0 && (
+            <div style={{ color: '#ffaa00', fontSize: '12px', marginTop: '8px' }}>
+              No comics found in your library yet! Please import some comics first so you can select a publisher or series.
+            </div>
+          )}
         </div>
+
+        {errorMsg && (
+          <div style={{ color: '#ff5555', marginBottom: '20px', fontWeight: 'bold' }}>
+            {errorMsg}
+          </div>
+        )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
           <button className="hud-btn" onClick={onClose}>Cancel</button>
