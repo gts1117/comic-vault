@@ -28,7 +28,8 @@ function App() {
           className="archive-book-trigger"
           onClick={() => setShowArchive(true)}
         >
-          <div className="page" />
+          <div className="page-right" />
+          <div className="page-left" />
         </div>
         <ShelfOverlay 
           onBoxClick={(box) => {
