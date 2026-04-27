@@ -6,7 +6,7 @@ import { Reader } from './components/Reader'
 import { ArchiveView } from './components/ArchiveView'
 import { BoxDetailView } from './components/BoxDetailView'
 import { BoxData } from './components/ShelfOverlay'
-import { BookCalibration } from './components/BookCalibration'
+import { CornerCalibration } from './components/CornerCalibration'
 import { useBackend } from './hooks/useBackend'
 import { useUIStore, useLibraryStore } from './store'
 import './App.css'
@@ -24,7 +24,7 @@ function App() {
   return (
     <div className="app-container">
       <div className="room-stage">
-        <BookCalibration />
+        <CornerCalibration />
         <ShelfOverlay 
           onBoxClick={(box) => {
             setActiveBox(box);
