@@ -65,7 +65,7 @@ export const CornerCalibration: React.FC = () => {
           key={`base-${i}`}
           onPointerDown={(e) => { e.stopPropagation(); setActivePoint({ state: 'base', index: i }); }}
           style={{
-            position: 'absolute', left: `${p.x}%`, top: `${p.y}%`, width: 20, height: 20,
+            position: 'absolute', left: `${p.x}%`, top: `${p.y}%`, width: 10, height: 10,
             transform: 'translate(-50%, -50%)', background: 'blue', borderRadius: '50%',
             cursor: 'grab', pointerEvents: 'auto', border: '2px solid white'
           }}
@@ -77,7 +77,7 @@ export const CornerCalibration: React.FC = () => {
           key={`hover-${i}`}
           onPointerDown={(e) => { e.stopPropagation(); setActivePoint({ state: 'hover', index: i }); }}
           style={{
-            position: 'absolute', left: `${p.x}%`, top: `${p.y}%`, width: 20, height: 20,
+            position: 'absolute', left: `${p.x}%`, top: `${p.y}%`, width: 10, height: 10,
             transform: 'translate(-50%, -50%)', background: 'red', borderRadius: '50%',
             cursor: 'grab', pointerEvents: 'auto', border: '2px solid white'
           }}
