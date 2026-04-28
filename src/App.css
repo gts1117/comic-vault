@@ -513,58 +513,41 @@ body {
   border-top: 1px solid var(--border-color);
 }
 
-/* ---- Page flip keyframes: skewY at midpoint simulates overhead-angle perspective ---- */
-@keyframes flip-front-out {
-  0%   { transform: rotateY(0deg)   skewY(0deg);  }
-  40%  { transform: rotateY(-70deg) skewY(-18deg); } /* leading corner arcs up-left */
-  100% { transform: rotateY(-90deg) skewY(0deg);  }
-}
-@keyframes flip-back-in {
-  0%   { transform: rotateY(90deg)   skewY(0deg);  }
-  60%  { transform: rotateY(-110deg) skewY(18deg); } /* trailing corner settles down */
-  100% { transform: rotateY(-180deg) skewY(0deg);  }
+/* ---- Archive Book Page Flip ---- */
+@keyframes book-flip {
+  0%   { transform: rotateY(0deg)    rotateX(0deg); }
+  50%  { transform: rotateY(-90deg)  rotateX(30deg); } /* page arcs upward at peak */
+  100% { transform: rotateY(-180deg) rotateX(0deg); }
 }
 
-/* Archive Book Interaction */
-/* Outer container — sits at the book's spine position and provides perspective depth */
 .archive-book-trigger {
   position: absolute;
-  /* spine top-left of the right page */
   left: 39.5%;
   top: 86.8%;
-  /* right page dimensions */
   width: 5.5%;
   height: 3.9%;
   cursor: pointer;
   z-index: 500;
   pointer-events: auto;
   background: rgba(0, 0, 0, 0.001);
-  /* Match the very subtle book tilt in the scene */
-  transform: rotateZ(1deg);
-  /* perspective-origin above the element = camera looking down, so rotateY arcs upward */
-  perspective: 400px;
-  perspective-origin: 0% -250%;
+  perspective: 300px;
+  perspective-origin: 0% 50%;
 }
 
-/* Page flip wrapper — children animate independently */
 .archive-book-trigger .page-flip {
   position: absolute;
   width: 100%;
   height: 100%;
+  transform-origin: left center;
   transform-style: preserve-3d;
+  transform: rotateY(0deg) rotateX(0deg);
 }
 
-/* Front face animates out */
-.archive-book-trigger:hover .page-front {
-  animation: flip-front-out 0.28s ease-in forwards;
+.archive-book-trigger:hover .page-flip {
+  animation: book-flip 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* Back face animates in, delayed so it starts at 90° */
-.archive-book-trigger:hover .page-back {
-  animation: flip-back-in 0.28s ease-out 0.26s forwards;
-}
-
-/* Front face — visible at rest */
+/* Front face */
 .archive-book-trigger .page-front {
   position: absolute;
   width: 100%;
@@ -578,31 +561,24 @@ body {
   border-radius: 0 1px 1px 0;
 }
 
-/* Shadow sweep overlay on front face — darkens as it rotates edge-on */
+/* Shadow darkens as page rotates edge-on */
 .archive-book-trigger .page-front::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to left,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.45) 100%
-  );
+  background: linear-gradient(to left, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 100%);
   opacity: 0;
   transition: opacity 0.27s ease-in;
-  border-radius: inherit;
 }
+.archive-book-trigger:hover .page-front::after { opacity: 1; }
 
-.archive-book-trigger:hover .page-front::after {
-  opacity: 1;
-}
-
-/* Back face — the underside, visible after the page passes 90° */
+/* Back face — starts pre-rotated so backface-visibility hides it until past 90° */
 .archive-book-trigger .page-back {
   position: absolute;
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  transform: rotateY(90deg); /* hidden edge-on at rest */
+  transform: rotateY(180deg);
   background: linear-gradient(to left,
     rgba(180, 165, 145, 0.95) 0%,
     rgba(235, 225, 210, 0.92) 40%,
@@ -611,19 +587,13 @@ body {
   border-radius: 1px 0 0 1px;
 }
 
-/* Shadow sweep overlay on back face — lightens as it unfolds */
+/* Shadow fades out as back face unfolds into the light */
 .archive-book-trigger .page-back::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.45) 100%
-  );
+  background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 100%);
   opacity: 1;
   transition: opacity 0.27s ease-out 0.27s;
 }
-
-.archive-book-trigger:hover .page-back::after {
-  opacity: 0;
-}
+.archive-book-trigger:hover .page-back::after { opacity: 0; }
