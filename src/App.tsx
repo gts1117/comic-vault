@@ -34,8 +34,10 @@ function App() {
           className="archive-book-trigger"
           onClick={() => setShowArchive(true)}
         >
-          <div className="page-right" />
-          <div className="page-left" />
+          <div className="page-flip">
+            <div className="page-front" />
+            <div className="page-back" />
+          </div>
         </div>
 
         {!libraryPath && (
