@@ -23,26 +23,19 @@ function App() {
   return (
     <div className="app-container">
       <div className="room-stage">
-        {/* Clickable Archive Book on the Rug */}
+        <ShelfOverlay 
+          onBoxClick={(box) => {
+            setActiveBox(box);
+          }}
+        />
+
+        {/* Archive Book on the Rug — must be after ShelfOverlay to be on top */}
         <div
           className="archive-book-trigger"
           onClick={() => setShowArchive(true)}
         >
           <div className="page-right" />
           <div className="page-left" />
-        </div>
-        <ShelfOverlay 
-          onBoxClick={(box) => {
-            setActiveBox(box);
-          }}
-        />
-        
-        {/* Clickable Archive Book on the Rug */}
-        <div 
-          className="archive-book-trigger"
-          onClick={() => setShowArchive(true)}
-        >
-          <div className="page"></div>
         </div>
 
         {!libraryPath && (

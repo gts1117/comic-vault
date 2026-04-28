@@ -521,8 +521,10 @@ body {
   width: 10.97%;
   height: 4.41%;
   cursor: pointer;
-  z-index: 100;
+  z-index: 500;
   pointer-events: auto;
+  /* Needs a non-fully-transparent background for WebKit to register hover */
+  background: rgba(0, 0, 0, 0.001);
 }
 
 /* Right page — visible at rest, collapses to spine on hover */
