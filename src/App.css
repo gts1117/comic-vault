@@ -529,9 +529,9 @@ body {
   background: rgba(0, 0, 0, 0.001);
   /* Match the very subtle book tilt in the scene */
   transform: rotateZ(1deg);
-  /* Perspective applied to parent so child rotateY looks 3D */
-  perspective: 600px;
-  perspective-origin: 0% 50%;
+  /* perspective-origin above the element = camera looking down, so rotateY arcs upward */
+  perspective: 400px;
+  perspective-origin: 0% -250%;
 }
 
 /* The page wrapper — rotates as a unit around the spine (left edge) */
