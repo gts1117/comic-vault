@@ -519,8 +519,8 @@ body {
    rotateX sandwich: rotateX(-30) rotateY(θ) rotateX(30)
    rotates around the tilted spine axis so the page arcs UP off the rug. */
 @keyframes book-flip {
-  0%   { transform: rotateX(-30deg) rotateY(0deg)    rotateX(30deg); }
-  100% { transform: rotateX(-30deg) rotateY(-180deg) rotateX(30deg); }
+  0%   { transform: rotateX(30deg) rotateY(0deg)    rotateX(-30deg); }
+  100% { transform: rotateX(30deg) rotateY(-180deg) rotateX(-30deg); }
 }
 
 .archive-book-trigger {
