@@ -371,10 +371,10 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
                 <img src={boxImg} className="box-image" alt="Comic Box" draggable={false} />
                 <div style={{
                   position: 'absolute',
-                  top: '44%',
-                  left: '18%',
-                  width: '62%',
-                  height: '24%',
+                  top: '57%',
+                  left: '13%',
+                  width: '38%',
+                  height: '11%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
