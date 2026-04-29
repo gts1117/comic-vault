@@ -387,11 +387,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
                     color: '#222',
                     opacity: 0.9,
                     mixBlendMode: 'multiply' as const,
-                    whiteSpace: 'normal',
-                    wordBreak: 'break-word',
-                    lineHeight: 1.2,
-                    display: 'block',
-                    width: '100%',
+                    whiteSpace: 'nowrap',
                     textAlign: 'center',
                     ...(flipImage ? { transform: 'scaleX(-1)' } : {}),
                   }}>{box.label}</span>
