@@ -160,12 +160,12 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
   const handleCreateBox = async (config: { label: string, rule_type: string, rule_value: string }) => {
     if (!apiPort) return;
     
-    // Find next available floor slot
+    // Find next available SHELF slot (exclude floor slots so new boxes are visible on shelves)
+    const shelfSlotCount = LEFT_SHELF_SLOTS.length + MIDDLE_SHELF_SLOTS.length + RIGHT_SHELF_SLOTS.length;
     const takenSlots = new Set(Object.values(assignments));
-    const floorStartIndex = INITIAL_SLOTS.length - FLOOR_SLOTS.length;
-    let targetSlot = null;
+    let targetSlot: number | null = null;
     
-    for (let i = floorStartIndex; i < INITIAL_SLOTS.length; i++) {
+    for (let i = 0; i < shelfSlotCount; i++) {
       if (!takenSlots.has(i)) {
         targetSlot = i;
         break;

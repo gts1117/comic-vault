@@ -29,19 +29,21 @@ function App() {
           }}
         />
 
-        {/* Archive Book on the Rug — must be after ShelfOverlay to be on top */}
-        <div
-          className="archive-book-trigger"
-          onClick={() => setShowArchive(true)}
-        >
-          <div className="page-flip">
-            <div className="page-front" />
-            <div className="page-back" />
+        {/* Archive Book — only show when library is loaded */}
+        {libraryPath && (
+          <div
+            className="archive-book-trigger"
+            onClick={() => setShowArchive(true)}
+          >
+            <div className="page-flip">
+              <div className="page-front" />
+              <div className="page-back" />
+            </div>
           </div>
-        </div>
+        )}
 
         {!libraryPath && (
-          <div className="welcome-state" style={{ position: 'absolute', zIndex: 200, background: 'rgba(0,0,0,0.8)', width: '100%', height: '100%' }}>
+          <div className="welcome-state" style={{ position: 'absolute', zIndex: 300, background: 'rgba(0,0,0,0.8)', width: '100%', height: '100%' }}>
             <h1>Welcome to Vault</h1>
             <p>To get started, you need to designate a Master Library folder.</p>
             <button onClick={() => setShowSettings(true)} className="btn-primary">Setup Library</button>
