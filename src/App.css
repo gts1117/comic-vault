@@ -115,12 +115,12 @@ body {
   color: #222;
   opacity: 0.85;
   mix-blend-mode: multiply;
-  /* Allow wrapping so long labels stay inside the box */
   white-space: normal;
   word-break: break-word;
   line-height: 1.2;
   display: block;
   width: 100%;
+  text-align: center;
   padding: 0 2px;
 }
 

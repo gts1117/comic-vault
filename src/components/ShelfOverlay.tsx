@@ -370,7 +370,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
               <div className="box-inner" style={flipImage ? { transform: 'scaleX(-1)' } : undefined}>
                 <img src={boxImg} className="box-image" alt="Comic Box" draggable={false} />
                 <div className="box-label">
-                  <span style={flipImage ? { transform: 'scaleX(-1)', display: 'block' } : undefined}>{box.label}</span>
+                  <span style={flipImage ? { transform: 'scaleX(-1)', display: 'block', textAlign: 'center' } : { display: 'block', textAlign: 'center' }}>{box.label}</span>
                 </div>
               </div>
             </div>
