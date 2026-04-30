@@ -63,9 +63,9 @@ body {
   z-index: 45;
   pointer-events: none;
 }
-.room-fg-left        { clip-path: inset(0 91% 0 0);    } /* left outer wall: 0-9%   */
-.room-fg-center-col  { clip-path: inset(0 37% 0 60%);  } /* center pillar: 60-63%   */
-.room-fg-right       { clip-path: inset(0 0 0 87%);    } /* right outer wall: 87%+  */
+.room-fg-left        { clip-path: inset(0 91% 0 0);    } /* left outer wall: 0–9%    */
+.room-fg-center-col  { clip-path: inset(0 36% 0 57%);  } /* center pillar: 57–64%    */
+.room-fg-right       { clip-path: inset(0 0 0 92%);    } /* right outer wall: 92%+   */
 
 .shelf-overlay {
   position: absolute;
