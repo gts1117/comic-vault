@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useUIStore } from '../store';
 
 interface ReaderProps {
   comicId: number;
@@ -11,11 +12,15 @@ export const Reader: React.FC<ReaderProps> = ({ comicId, onClose }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const apiPort = useUIStore(state => state.apiPort);
+
   // Initial load
   useEffect(() => {
+    if (!apiPort) return;
+    
     const fetchMetadata = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/comic/${comicId}/read`);
+        const res = await fetch(`http://127.0.0.1:${apiPort}/api/comic/${comicId}/read`);
         if (!res.ok) {
           if (res.status === 422) {
             setError("This comic needs to be converted to CBZ before reading.");
@@ -34,15 +39,15 @@ export const Reader: React.FC<ReaderProps> = ({ comicId, onClose }) => {
     };
 
     fetchMetadata();
-  }, [comicId]);
+  }, [comicId, apiPort]);
 
   // Sync progress to backend when component unmounts or page changes significantly
   useEffect(() => {
-    if (totalPages === 0) return; // Don't sync if not loaded
+    if (totalPages === 0 || !apiPort) return; // Don't sync if not loaded
 
     const syncProgress = async () => {
       try {
-        await fetch(`http://127.0.0.1:8000/api/comic/${comicId}/progress`, {
+        await fetch(`http://127.0.0.1:${apiPort}/api/comic/${comicId}/progress`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -103,9 +108,9 @@ export const Reader: React.FC<ReaderProps> = ({ comicId, onClose }) => {
     );
   }
 
-  const currentImageUrl = `http://127.0.0.1:8000/api/comic/${comicId}/page/${currentPage}`;
-  const nextImageUrl1 = currentPage + 1 < totalPages ? `http://127.0.0.1:8000/api/comic/${comicId}/page/${currentPage + 1}` : null;
-  const nextImageUrl2 = currentPage + 2 < totalPages ? `http://127.0.0.1:8000/api/comic/${comicId}/page/${currentPage + 2}` : null;
+  const currentImageUrl = apiPort ? `http://127.0.0.1:${apiPort}/api/comic/${comicId}/page/${currentPage}` : '';
+  const nextImageUrl1 = apiPort && currentPage + 1 < totalPages ? `http://127.0.0.1:${apiPort}/api/comic/${comicId}/page/${currentPage + 1}` : null;
+  const nextImageUrl2 = apiPort && currentPage + 2 < totalPages ? `http://127.0.0.1:${apiPort}/api/comic/${comicId}/page/${currentPage + 2}` : null;
 
   return (
     <div className="reader-overlay">

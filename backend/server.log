@@ -1,0 +1,3 @@
+PORT=56950
+2026-04-27 12:49:35,087 - vault.server - INFO - Starting uvicorn on port 56950
+2026-04-27 12:49:35,127 - vault.server - INFO - Applying schema from: /Users/grahamschwartz/Desktop/comic-vault/backend/schema.sql
