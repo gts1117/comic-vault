@@ -8,7 +8,7 @@ import { BoxDetailView } from './components/BoxDetailView'
 import { BoxData } from './components/ShelfOverlay'
 import { useBackend } from './hooks/useBackend'
 import { useUIStore, useLibraryStore } from './store'
-import roomBg from './assets/room.jpg'
+import roomBg from './assets/room_bg.png'
 import './App.css'
 
 function App() {
