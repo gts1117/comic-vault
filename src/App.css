@@ -50,6 +50,23 @@ body {
   box-shadow: 0 0 50px rgba(0,0,0,0.8);
 }
 
+/* Foreground occlusion masks — same bg image/size/position as room-stage so they
+   align pixel-perfect. Clipped to specific areas, sit above boxes (z-index 45). */
+.room-fg-mask {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image: url('./assets/room_bg.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 45;
+  pointer-events: none;
+}
+.room-fg-left        { clip-path: inset(0 91% 0 0);    } /* left outer wall: 0-9%   */
+.room-fg-center-col  { clip-path: inset(0 37% 0 60%);  } /* center pillar: 60-63%   */
+.room-fg-right       { clip-path: inset(0 0 0 87%);    } /* right outer wall: 87%+  */
+
 .shelf-overlay {
   position: absolute;
   top: 0;

@@ -8,7 +8,6 @@ import { BoxDetailView } from './components/BoxDetailView'
 import { BoxData } from './components/ShelfOverlay'
 import { useBackend } from './hooks/useBackend'
 import { useUIStore, useLibraryStore } from './store'
-import roomBg from './assets/room_bg.png'
 import './App.css'
 
 function App() {
@@ -50,20 +49,10 @@ function App() {
             <button onClick={() => setShowSettings(true)} className="btn-primary">Setup Library</button>
           </div>
         )}
-        {/* Foreground occlusion masks — same room image clipped to wall/frame areas,
-            sits above boxes so they're naturally hidden behind the bookcase walls */}
-        <img src={roomBg} aria-hidden="true" style={{
-          position: 'absolute', top: 0, left: 0,
-          width: '100%', height: '100%', objectFit: 'cover',
-          clipPath: 'inset(0 91% 0 0)',   /* left wall strip ~0-9% */
-          zIndex: 45, pointerEvents: 'none',
-        }} />
-        <img src={roomBg} aria-hidden="true" style={{
-          position: 'absolute', top: 0, left: 0,
-          width: '100%', height: '100%', objectFit: 'cover',
-          clipPath: 'inset(0 0 0 88%)',   /* right wall strip ~88-100% */
-          zIndex: 45, pointerEvents: 'none',
-        }} />
+        {/* Foreground occlusion masks — background-image divs align pixel-perfect with room-stage */}
+        <div className="room-fg-mask room-fg-left" />
+        <div className="room-fg-mask room-fg-center-col" />
+        <div className="room-fg-mask room-fg-right" />
       </div>
 
       {/* Minimal HUD overlaying the room */}
