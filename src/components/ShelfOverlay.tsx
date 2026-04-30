@@ -383,7 +383,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
       </div>
       
       {/* Edit Mode Toggle HUD */}
-      <div style={{ position: 'absolute', bottom: 20, right: 20, zIndex: 100, display: 'flex', gap: '10px' }}>
+      <div style={{ position: 'absolute', bottom: 20, right: 20, zIndex: 500, display: 'flex', gap: '10px' }}>
         <button 
           className="hud-btn" 
           style={{ background: editMode ? 'rgba(255, 50, 50, 0.8)' : undefined }}
