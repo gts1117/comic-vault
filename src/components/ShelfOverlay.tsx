@@ -64,13 +64,13 @@ const RIGHT_SHELF_SLOTS = generateGrid(
 );
 
 const MIDDLE_SHELF_SLOTS = generateGrid(
-  46.0, 57.0, 3,
+  44.5, 63.1, 4,
   [
-    { leftTop: 9.0, rightTop: 13.5 },
-    { leftTop: 21.5, rightTop: 26.5 },
-    { leftTop: 35.0, rightTop: 40.0 },
-    { leftTop: 48.5, rightTop: 53.5 },
-    { leftTop: 61.5, rightTop: 66.0 }
+    { leftTop: 8.0, rightTop: 15.2 },
+    { leftTop: 20.3, rightTop: 29.3 },
+    { leftTop: 34.5, rightTop: 42.0 },
+    { leftTop: 47.6, rightTop: 54.7 },
+    { leftTop: 60.9, rightTop: 67.9 }
   ],
   '11.5%', '25deg', '-4deg', false, false
 );
