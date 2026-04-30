@@ -30,8 +30,9 @@ function MaskTuner() {
         ${masks.map((m, i) => `
           .room-fg-mask-${i+1} { 
             clip-path: inset(0 ${100 - m.end}% 0 ${m.start}%) !important; 
-            border-left: 1px dashed red; 
-            border-right: 1px dashed red; 
+            background: rgba(255, 0, 0, 0.2) !important;
+            border-left: 2px solid red; 
+            border-right: 2px solid red; 
           }
         `).join('')}
       `}</style>
