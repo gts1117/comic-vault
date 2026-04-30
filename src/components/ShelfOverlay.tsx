@@ -60,7 +60,7 @@ const RIGHT_SHELF_SLOTS = generateGrid(
     { leftTop: 58.5, rightTop: 66.3 },
     { leftTop: 71.8, rightTop: 81.0 }
   ],
-  '11.5%', '0deg', '0deg', false, false
+  '10.5%', '0deg', '0deg', false, false
 );
 
 const MIDDLE_SHELF_SLOTS = generateGrid(
@@ -72,7 +72,7 @@ const MIDDLE_SHELF_SLOTS = generateGrid(
     { leftTop: 47.6, rightTop: 54.7 },
     { leftTop: 60.9, rightTop: 67.9 }
   ],
-  '11.5%', '25deg', '-4deg', false, false
+  '10.5%', '25deg', '-4deg', false, false
 );
 
 const LEFT_SHELF_SLOTS = generateGrid(
@@ -84,14 +84,14 @@ const LEFT_SHELF_SLOTS = generateGrid(
     { leftTop: 53.4, rightTop: 44.9 },
     { leftTop: 64.3, rightTop: 58.8 }
   ],
-  '11.5%', '-25deg', '4deg', true, true
+  '10.5%', '-25deg', '4deg', true, true
 );
 
 // Generic spawn points on the floor for unarranged boxes
 const FLOOR_SLOTS: Slot[] = Array.from({ length: 6 }).map((_, i) => ({
   left: `${40 + i * 5}%`,
   top: '85%',
-  width: '11.5%',
+  width: '10.5%',
   rotateY: '0deg',
   skewY: '0deg',
   flipImage: false,
@@ -367,8 +367,14 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
                 zIndex: isDragging ? 1000 : baseZ
               }}
             >
-              <div className="box-inner" style={flipImage ? { transform: 'scaleX(-1)' } : undefined}>
-                <img src={boxImg} className="box-image" alt="Comic Box" draggable={false} />
+              <div className="box-inner">
+                <img 
+                  src={boxImg} 
+                  className="box-image" 
+                  alt="Comic Box" 
+                  draggable={false} 
+                  style={flipImage ? { transform: 'scaleX(-1)' } : undefined} 
+                />
               </div>
               <div className="box-tooltip">{box.label}</div>
             </div>
