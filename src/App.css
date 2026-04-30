@@ -95,33 +95,32 @@ body {
   display: block;
 }
 
-.box-label {
+/* Hover tooltip — lives outside 3D-transformed box-inner so it's always flat */
+.box-tooltip {
   position: absolute;
-  top: 44%;
-  left: 20%;
-  width: 58%;
-  height: 24%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  overflow: hidden;
+  bottom: 108%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(248, 242, 228, 0.97);
+  border: 1px solid rgba(160, 130, 80, 0.5);
+  color: #2a1a08;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.75vw;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 3px;
+  white-space: nowrap;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 200;
 }
 
-.box-label span {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.65vw;
-  font-weight: 900;
-  color: #222;
-  opacity: 0.85;
-  mix-blend-mode: multiply;
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.2;
-  display: block;
-  width: 100%;
-  text-align: center;
-  padding: 0 2px;
+.shelf-box:hover .box-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-3px);
 }
 
 /* Minimal HUD */
