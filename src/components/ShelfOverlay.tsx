@@ -369,8 +369,8 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
             >
               <div className="box-inner">
                 <img src={boxImg} className="box-image" alt="Comic Box" draggable={false} />
-                {/* Label overlays the centered brass card — left:28% width:44% matches the new front-facing box image */}
-                <div style={{ position: 'absolute', top: '53%', left: '28%', width: '44%', height: '14%' }}>
+                {/* Label over centered brass card — coordinates match new front-facing box.png */}
+                <div style={{ position: 'absolute', top: '52%', left: '33%', width: '34%', height: '12%' }}>
                   <span style={{
                     position: 'absolute',
                     left: '50%',

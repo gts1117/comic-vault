@@ -93,6 +93,8 @@ body {
 .box-image {
   width: 100%;
   display: block;
+  /* screen blend: black bg disappears against dark room, cream box shows through */
+  mix-blend-mode: screen;
 }
 
 .box-label {
