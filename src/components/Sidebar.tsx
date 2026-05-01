@@ -16,19 +16,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className="archivist-sidebar">
       <div className="sidebar-header">
-        <h1 className="vault-title">THE VAULT</h1>
-        <div className="curator-block">
-          <div className="curator-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-          </div>
-          <div className="curator-info">
-            <span className="curator-label">CURATOR</span>
-            <span className="curator-name">THE ARCHIVIST</span>
-          </div>
-        </div>
+        <h1 className="vault-title">the archive</h1>
       </div>
 
       <nav className="sidebar-nav">
