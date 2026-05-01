@@ -13,7 +13,7 @@ import './App.css'
 
 function App() {
   useBackend()
-  const { libraryPath, activeComicId, setActiveComicId } = useUIStore()
+  const { libraryPath, activeComicId, setActiveComicId, isSidebarOpen, setSidebarOpen } = useUIStore()
   const { comics } = useLibraryStore()
   
   const [showSettings, setShowSettings] = useState(false)
@@ -56,6 +56,13 @@ function App() {
             <button onClick={() => setShowSettings(true)} className="btn-primary">Setup Library</button>
           </div>
         )}
+        {/* Interactive Lamp to toggle Sidebar */}
+        <div 
+          className="lamp-hotspot" 
+          onClick={() => setSidebarOpen(!isSidebarOpen)}
+          title="Toggle Sidebar"
+        />
+
         {/* Foreground occlusion masks */}
         <div className="room-fg-mask room-fg-left" />
         <div className="room-fg-mask room-fg-center" />

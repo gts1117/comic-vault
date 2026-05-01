@@ -10,6 +10,11 @@
   box-shadow: 5px 0 20px rgba(0,0,0,0.5);
   z-index: 1000;
   position: relative;
+  transition: margin-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.archivist-sidebar.collapsed {
+  margin-left: -280px;
 }
 
 .sidebar-header {

@@ -1,0 +1,143 @@
+.reader-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(10, 10, 10, 0.95);
+  z-index: 4000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px);
+}
+
+.reader-book-container {
+  width: 95vw;
+  height: 95vh;
+  background-color: #1a1512; /* Dark leather color */
+  border-radius: 8px;
+  box-shadow: 
+    0 30px 60px rgba(0,0,0,0.8),
+    inset 0 0 100px rgba(0,0,0,0.6),
+    inset 2px 2px 5px rgba(255,255,255,0.05),
+    inset -2px -2px 5px rgba(0,0,0,0.8);
+  border: 1px solid #2a201a;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3vh 3vw;
+  background-image: url('data:image/svg+xml;utf8,<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.05"/></svg>');
+}
+
+/* The actual comic page wrapper */
+.reader-page-wrapper {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+  background: #000;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.reader-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  /* subtle inner shadow effect to blend with the 'screen' */
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* The physical ribbon bookmark for controls */
+.reader-ribbon {
+  position: absolute;
+  top: -10px;
+  right: 60px;
+  width: 50px;
+  height: 180px;
+  background: linear-gradient(to bottom, #8a1c1c, #5c0b0b);
+  box-shadow: 2px 5px 15px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 30px;
+  gap: 20px;
+  z-index: 10;
+  border-bottom-left-radius: 25px;
+  border-bottom-right-radius: 25px;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.reader-ribbon:hover {
+  transform: translateY(10px);
+}
+
+.reader-ribbon::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  border-bottom: 25px solid transparent; /* creates the V cut if we want it, but rounded is fine too */
+  display: none; 
+}
+
+.ribbon-btn {
+  background: none;
+  border: none;
+  color: #e3cca6;
+  font-size: 24px;
+  cursor: pointer;
+  transition: color 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+
+.ribbon-btn:hover {
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* Stamped Gold Text for Progress */
+.reader-progress-stamp {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #a68444;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.8), -1px -1px 1px rgba(255,255,255,0.05);
+  pointer-events: none;
+}
+
+/* Click areas */
+.reader-click-zone {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 40%;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.reader-click-zone.left {
+  left: 0;
+}
+
+.reader-click-zone.right {
+  right: 0;
+}

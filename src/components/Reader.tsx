@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useUIStore } from '../store';
 
+import './Reader.css';
+
 interface ReaderProps {
   comicId: number;
   onClose: () => void;
@@ -60,7 +62,6 @@ export const Reader: React.FC<ReaderProps> = ({ comicId, onClose }) => {
       }
     };
 
-    // We could debounce this, but doing it on page change is fine for local backend
     syncProgress();
 
     return () => {
@@ -91,10 +92,12 @@ export const Reader: React.FC<ReaderProps> = ({ comicId, onClose }) => {
   if (error) {
     return (
       <div className="reader-overlay">
-        <div className="reader-error">
-          <h2>Error</h2>
-          <p>{error}</p>
-          <button className="btn-primary" onClick={onClose}>Close</button>
+        <div className="modal-panel" style={{ zIndex: 5000 }}>
+          <h2 className="modal-title" style={{ color: '#E50914' }}>Error</h2>
+          <p className="modal-help-text" style={{ fontSize: '16px', marginBottom: '20px' }}>{error}</p>
+          <div className="modal-actions">
+            <button className="btn-primary" onClick={onClose}>Close</button>
+          </div>
         </div>
       </div>
     );
@@ -103,7 +106,9 @@ export const Reader: React.FC<ReaderProps> = ({ comicId, onClose }) => {
   if (isLoading || totalPages === 0) {
     return (
       <div className="reader-overlay">
-        <div className="reader-loading">Loading...</div>
+        <div className="reader-book-container">
+          <span className="reader-progress-stamp">OPENING ARCHIVE...</span>
+        </div>
       </div>
     );
   }
@@ -114,27 +119,32 @@ export const Reader: React.FC<ReaderProps> = ({ comicId, onClose }) => {
 
   return (
     <div className="reader-overlay">
-      {/* Top Bar */}
-      <div className="reader-topbar">
-        <button className="reader-close" onClick={onClose}>✕</button>
-        <span className="reader-progress">Page {currentPage + 1} of {totalPages}</span>
-      </div>
+      <div className="reader-book-container">
+        
+        {/* Ribbon Bookmark Controls */}
+        <div className="reader-ribbon">
+          <button className="ribbon-btn" onClick={onClose} title="Close Reader">✕</button>
+          <button className="ribbon-btn" onClick={() => {}} title="Single Page View">📄</button>
+          <button className="ribbon-btn" onClick={() => {}} title="Settings">⚙️</button>
+        </div>
 
-      {/* Main Image */}
-      <div className="reader-content" onClick={(e) => {
-        // Click right half to go next, left half to go prev
-        const rect = e.currentTarget.getBoundingClientRect();
-        if (e.clientX > rect.left + rect.width / 2) {
-          goToNext();
-        } else {
-          goToPrev();
-        }
-      }}>
-        <img 
-          src={currentImageUrl} 
-          alt={`Page ${currentPage + 1}`} 
-          className="reader-image"
-        />
+        {/* The Page Content Area */}
+        <div className="reader-page-wrapper">
+          <div className="reader-click-zone left" onClick={goToPrev} />
+          <div className="reader-click-zone right" onClick={goToNext} />
+          
+          <img 
+            src={currentImageUrl} 
+            alt={`Page ${currentPage + 1}`} 
+            className="reader-image"
+          />
+        </div>
+
+        {/* Gold Stamped Progress */}
+        <div className="reader-progress-stamp">
+          PAGE {currentPage + 1} OF {totalPages}
+        </div>
+
       </div>
 
       {/* Pre-fetching engine: Hidden images to force browser cache */}

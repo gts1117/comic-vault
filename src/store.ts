@@ -34,6 +34,7 @@ interface UIState {
   libraryPath: string | null
   isImporting: boolean
   activeComicId: number | null
+  isSidebarOpen: boolean
   editMode: boolean
   isAddingBox: boolean
   setApiPort: (port: number) => void
@@ -42,6 +43,7 @@ interface UIState {
   setLibraryPath: (path: string | null) => void
   setIsImporting: (isImporting: boolean) => void
   setActiveComicId: (id: number | null) => void
+  setSidebarOpen: (isOpen: boolean) => void
   setEditMode: (editMode: boolean) => void
   setIsAddingBox: (isAddingBox: boolean) => void
 }
@@ -53,6 +55,7 @@ export const useUIStore = create<UIState>((set) => ({
   libraryPath: null,
   isImporting: false,
   activeComicId: null,
+  isSidebarOpen: true,
   editMode: false,
   isAddingBox: false,
   setApiPort: (apiPort) => set({ apiPort }),
@@ -61,6 +64,7 @@ export const useUIStore = create<UIState>((set) => ({
   setLibraryPath: (libraryPath) => set({ libraryPath }),
   setIsImporting: (isImporting) => set({ isImporting }),
   setActiveComicId: (activeComicId) => set({ activeComicId }),
+  setSidebarOpen: (isSidebarOpen) => set({ isSidebarOpen }),
   setEditMode: (editMode) => set({ editMode }),
   setIsAddingBox: (isAddingBox) => set({ isAddingBox }),
 }))

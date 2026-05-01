@@ -11,10 +11,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onImportClick, 
   onSettingsClick
 }) => {
-  const { editMode, setEditMode, setIsAddingBox } = useUIStore();
+  const { editMode, setEditMode, setIsAddingBox, isSidebarOpen } = useUIStore();
 
   return (
-    <div className="archivist-sidebar">
+    <div className={`archivist-sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
       <div className="sidebar-header">
         <h1 className="vault-title">the archive</h1>
       </div>
