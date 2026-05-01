@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ShelfOverlay } from './components/ShelfOverlay'
+import { Sidebar } from './components/Sidebar'
 import { SettingsModal } from './components/SettingsModal'
 import { ImportModal } from './components/ImportModal'
 import { Reader } from './components/Reader'
@@ -22,7 +23,13 @@ function App() {
 
   return (
     <div className="app-container">
-      <div className="room-stage">
+      <Sidebar 
+        onImportClick={() => setShowImport(true)}
+        onSettingsClick={() => setShowSettings(true)}
+      />
+      
+      <div className="room-wrapper">
+        <div className="room-stage">
         <ShelfOverlay 
           onBoxClick={(box) => {
             setActiveBox(box);
@@ -54,11 +61,6 @@ function App() {
         <div className="room-fg-mask room-fg-center" />
         <div className="room-fg-mask room-fg-right" />
       </div>
-
-      {/* Minimal HUD overlaying the room */}
-      <div className="hud-overlay">
-        <button className="hud-btn" onClick={() => setShowImport(true)}>📥 Import</button>
-        <button className="hud-btn" onClick={() => setShowSettings(true)}>⚙️ Settings</button>
       </div>
 
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}

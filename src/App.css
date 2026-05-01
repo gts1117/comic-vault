@@ -33,9 +33,19 @@ body {
   height: 100vh;
   background-color: #050505;
   display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.room-wrapper {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   overflow: hidden;
+  background-color: #050505;
 }
 
 .room-stage {
@@ -140,33 +150,7 @@ body {
   transform: translateX(-50%) translateY(-3px);
 }
 
-/* Minimal HUD */
-.hud-overlay {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  display: flex;
-  gap: 15px;
-  z-index: 500;
-}
 
-.hud-btn {
-  background: rgba(30, 30, 30, 0.8);
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.2s;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-}
-
-.hud-btn:hover {
-  background: rgba(50, 50, 50, 0.9);
-  transform: translateY(-2px);
-}
 
 /* Reader Overlay */
 .reader-overlay {

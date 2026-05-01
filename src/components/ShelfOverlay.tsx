@@ -113,12 +113,9 @@ interface ShelfOverlayProps {
 }
 
 export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
-  const { apiPort } = useUIStore();
+  const { apiPort, editMode, setEditMode, isAddingBox, setIsAddingBox } = useUIStore();
   const [boxes, setBoxes] = useState<BoxData[]>([]);
   const [assignments, setAssignments] = useState<Record<string, number>>({});
-  
-  const [showConfigModal, setShowConfigModal] = useState(false);
-  const [editMode, setEditMode] = useState(false);
   
   // Fetch boxes on mount
   const loadBoxes = async () => {
@@ -179,7 +176,7 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
         body: JSON.stringify({ ...config, slot_idx: targetSlot })
       });
       if (res.ok) {
-        setShowConfigModal(false);
+        setIsAddingBox(false);
         loadBoxes(); // Reload to get the new box ID and update state
       }
     } catch (e) {
@@ -382,25 +379,9 @@ export const ShelfOverlay: React.FC<ShelfOverlayProps> = ({ onBoxClick }) => {
         })}
       </div>
       
-      {/* Edit Mode Toggle HUD */}
-      <div style={{ position: 'absolute', bottom: 20, right: 20, zIndex: 500, display: 'flex', gap: '10px' }}>
-        <button 
-          className="hud-btn" 
-          style={{ background: editMode ? 'rgba(255, 50, 50, 0.8)' : undefined }}
-          onClick={() => setEditMode(!editMode)}
-        >
-          {editMode ? 'Finish Editing' : '🛠️ Edit Box Layout'}
-        </button>
-        {editMode && (
-          <button className="hud-btn" onClick={() => setShowConfigModal(true)}>
-            📦 Add New Box
-          </button>
-        )}
-      </div>
-      
-      {showConfigModal && (
+      {isAddingBox && (
         <BoxConfigModal 
-          onClose={() => setShowConfigModal(false)}
+          onClose={() => setIsAddingBox(false)}
           onSave={handleCreateBox}
         />
       )}

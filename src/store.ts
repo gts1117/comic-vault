@@ -34,12 +34,16 @@ interface UIState {
   libraryPath: string | null
   isImporting: boolean
   activeComicId: number | null
+  editMode: boolean
+  isAddingBox: boolean
   setApiPort: (port: number) => void
   setActivePublisher: (pub: string | null) => void
   setSearchQuery: (query: string) => void
   setLibraryPath: (path: string | null) => void
   setIsImporting: (isImporting: boolean) => void
   setActiveComicId: (id: number | null) => void
+  setEditMode: (editMode: boolean) => void
+  setIsAddingBox: (isAddingBox: boolean) => void
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -49,10 +53,14 @@ export const useUIStore = create<UIState>((set) => ({
   libraryPath: null,
   isImporting: false,
   activeComicId: null,
+  editMode: false,
+  isAddingBox: false,
   setApiPort: (apiPort) => set({ apiPort }),
   setActivePublisher: (activePublisher) => set({ activePublisher }),
   setSearchQuery: (searchQuery) => set({ searchQuery }),
   setLibraryPath: (libraryPath) => set({ libraryPath }),
   setIsImporting: (isImporting) => set({ isImporting }),
   setActiveComicId: (activeComicId) => set({ activeComicId }),
+  setEditMode: (editMode) => set({ editMode }),
+  setIsAddingBox: (isAddingBox) => set({ isAddingBox }),
 }))
