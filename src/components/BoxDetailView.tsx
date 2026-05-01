@@ -3,6 +3,8 @@ import { useUIStore } from '../store';
 import { BoxData } from './ShelfOverlay';
 import { Comic } from '../store';
 
+import './Grid.css';
+
 interface BoxDetailViewProps {
   box: BoxData;
   onClose: () => void;
@@ -36,79 +38,46 @@ export const BoxDetailView: React.FC<BoxDetailViewProps> = ({ box, onClose, onSe
   }, [box.id, apiPort]);
 
   return (
-    <div className="box-detail-overlay" style={{
-      position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.9)',
-      zIndex: 2000,
-      display: 'flex', flexDirection: 'column',
-      padding: '40px',
-      color: 'white',
-      fontFamily: "'Inter', sans-serif"
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '42px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '3px' }}>
-            {box.label}
-          </h1>
-          <div style={{ fontSize: '14px', color: '#aaa', marginTop: '5px' }}>
-            {box.rule_type.toUpperCase()}: {box.rule_value}
-          </div>
+    <div className="archive-overlay">
+      <div className="archive-header">
+        <div className="archive-title-group">
+          <h1 className="archive-title">{box.label}</h1>
+          <span className="archive-subtitle">{box.rule_type.toUpperCase()}: {box.rule_value}</span>
         </div>
-        <button onClick={onClose} style={{
-          background: 'none', border: 'none', color: 'white', fontSize: '32px', cursor: 'pointer'
-        }}>✕</button>
+        <button onClick={onClose} className="archive-close-btn">✕</button>
       </div>
       
       {loading ? (
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <h2>Loading contents...</h2>
+          <h2 className="archive-subtitle">Scanning Box Contents...</h2>
         </div>
       ) : contents.length === 0 ? (
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <h2 style={{ color: '#666' }}>This box is empty.</h2>
+          <h2 className="archive-subtitle">This box is empty.</h2>
         </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-          gap: '30px',
-          overflowY: 'auto',
-          paddingRight: '10px'
-        }}>
+        <div className="comic-grid">
           {contents.map(comic => (
             <div 
               key={comic.id} 
+              className="comic-card"
               onClick={() => onSelectComic(comic.id)}
-              style={{
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-              }}
-              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
-              <div style={{
-                width: '100%',
-                aspectRatio: '0.66',
-                backgroundColor: '#111',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                marginBottom: '10px',
-                border: '1px solid #333'
-              }}>
+              <div className="comic-card-cover">
                 {apiPort && (
                   <img 
                     src={`http://localhost:${apiPort}/api/thumb/${comic.id}`} 
                     alt={comic.title || `Issue ${comic.issue_number}`}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    className="comic-card-image"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}
                   />
                 )}
               </div>
-              <div style={{ fontSize: '11px', color: '#aaa', textTransform: 'uppercase' }}>{comic.publisher}</div>
-              <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{comic.series_name} #{comic.issue_number}</div>
-              <div style={{ fontSize: '12px', color: '#ccc' }}>{comic.title}</div>
+              <div className="comic-card-publisher">{comic.publisher || "UNKNOWN PUBLISHER"}</div>
+              <div className="comic-card-series">{comic.series_name} #{comic.issue_number}</div>
+              <div className="comic-card-title">{comic.title}</div>
             </div>
           ))}
         </div>

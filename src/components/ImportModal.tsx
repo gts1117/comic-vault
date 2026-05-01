@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useUIStore, useLibraryStore } from '../store';
 
+import './Modals.css';
+
 interface ImportModalProps {
   onClose: () => void;
 }
@@ -64,50 +66,52 @@ export const ImportModal: React.FC<ImportModalProps> = ({ onClose }) => {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <h2>Import Comics</h2>
+      <div className="modal-panel" onClick={e => e.stopPropagation()}>
+        <h2 className="modal-title">📥 Import Comics</h2>
         
-        <div className="settings-group">
-          <label>Source Folder</label>
+        <div className="modal-group">
+          <label className="modal-label">Source Folder</label>
           <div className="path-row">
             <input 
               type="text" 
               value={sourcePath || "Not Selected"} 
               readOnly 
-              className="path-input"
+              className="modal-input"
             />
             <button onClick={handlePickSource} className="btn-secondary" disabled={isImporting}>Select</button>
           </div>
         </div>
 
-        <div className="settings-group">
-          <label>Import Mode</label>
-          <div className="radio-group">
-            <label className="radio-label">
+        <div className="modal-group">
+          <label className="modal-label">Import Mode</label>
+          <div className="radio-group" style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
+            <label className="radio-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
               <input 
                 type="radio" 
                 checked={mode === 'copy'} 
                 onChange={() => setMode('copy')} 
                 disabled={isImporting}
+                style={{ accentColor: '#D4AF37' }}
               />
               Copy (Safe)
             </label>
-            <label className="radio-label">
+            <label className="radio-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
               <input 
                 type="radio" 
                 checked={mode === 'move'} 
                 onChange={() => setMode('move')} 
                 disabled={isImporting}
+                style={{ accentColor: '#D4AF37' }}
               />
               Move (Organize Original)
             </label>
           </div>
-          <p className="help-text">
+          <p className="modal-help-text">
             Comics will be indexed and moved to your Master Library folder.
           </p>
         </div>
 
-        {status && <div className={`status-indicator ${isImporting ? 'pulse' : ''}`}>{status}</div>}
+        {status && <div className={`modal-help-text ${isImporting ? 'pulse' : ''}`} style={{ color: '#D4AF37' }}>{status}</div>}
 
         <div className="modal-actions">
           <button onClick={onClose} className="btn-secondary" disabled={isImporting}>Cancel</button>

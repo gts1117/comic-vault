@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useLibraryStore } from '../store';
 import { invoke } from '@tauri-apps/api/core';
 
+import './Modals.css';
+
 interface BoxConfigModalProps {
   onClose: () => void;
   onSave: (config: { label: string, rule_type: string, rule_value: string }) => void;
@@ -29,79 +31,62 @@ export const BoxConfigModal: React.FC<BoxConfigModalProps> = ({ onClose, onSave 
   };
 
   return (
-    <div className="modal-overlay" style={{
-      position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-      backgroundColor: 'rgba(0, 0, 0, 0.85)',
-      display: 'flex', justifyContent: 'center', alignItems: 'center',
-      zIndex: 3000
-    }}>
-      <div className="modal-content" style={{
-        backgroundColor: '#1a1a1a', padding: '40px', borderRadius: '12px',
-        width: '500px', color: 'white', border: '1px solid #333'
-      }}>
-        <h2 style={{ marginTop: 0, marginBottom: '30px' }}>📦 Configure New Box</h2>
+    <div className="modal-overlay">
+      <div className="modal-panel">
+        <h2 className="modal-title">📦 Configure New Box</h2>
         
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', color: '#aaa' }}>Box Label (Text on the box)</label>
+        <div className="modal-group">
+          <label className="modal-label">Box Label (Text on the box)</label>
           <input 
             type="text" 
             value={label} 
             onChange={(e) => setLabel(e.target.value.toUpperCase())}
             placeholder="e.g. MARVEL"
-            style={{
-              width: '100%', padding: '12px', backgroundColor: '#333',
-              border: 'none', borderRadius: '4px', color: 'white', fontSize: '16px'
-            }}
+            className="modal-input"
           />
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', color: '#aaa' }}>What goes in this box?</label>
+        <div className="modal-group">
+          <label className="modal-label">What goes in this box?</label>
           <select 
             value={ruleType} 
             onChange={(e) => {
               setRuleType(e.target.value);
               setRuleValue(''); // Reset value when changing type
             }}
-            style={{
-              width: '100%', padding: '12px', backgroundColor: '#333',
-              border: 'none', borderRadius: '4px', color: 'white', fontSize: '16px'
-            }}
+            className="modal-select"
           >
             <option value="publisher">Everything by a specific Publisher</option>
             <option value="series">All issues in a specific Series</option>
           </select>
         </div>
 
-        <div style={{ marginBottom: '30px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', color: '#aaa' }}>Select Target</label>
+        <div className="modal-group">
+          <label className="modal-label">Select Target</label>
           <select 
             value={ruleValue} 
             onChange={(e) => setRuleValue(e.target.value)}
-            style={{
-              width: '100%', padding: '12px', backgroundColor: '#333',
-              border: 'none', borderRadius: '4px', color: 'white', fontSize: '16px'
-            }}
+            className="modal-select"
           >
             <option value="" disabled>-- Select --</option>
             {ruleType === 'publisher' && publishers.map(p => <option key={p} value={p}>{p}</option>)}
             {ruleType === 'series' && seriesList.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
           {publishers.length === 0 && seriesList.length === 0 && (
-            <div style={{ color: '#ffaa00', fontSize: '12px', marginTop: '8px' }}>
+            <div className="modal-help-text" style={{ color: '#D4AF37' }}>
               No comics found in your library yet! Please import some comics first so you can select a publisher or series.
             </div>
           )}
         </div>
 
         {errorMsg && (
-          <div style={{ color: '#ff5555', marginBottom: '20px', fontWeight: 'bold' }}>
+          <div className="modal-error">
             {errorMsg}
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
-          <button className="hud-btn" onClick={onClose}>Cancel</button>
+        <div className="modal-actions">
+          <button className="btn-secondary" onClick={onClose}>Cancel</button>
           <button className="btn-primary" onClick={handleSave}>Create Box</button>
         </div>
       </div>

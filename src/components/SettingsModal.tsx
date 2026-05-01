@@ -2,6 +2,8 @@ import React from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useUIStore, useLibraryStore } from '../store';
 
+import './Modals.css';
+
 interface SettingsModalProps {
   onClose: () => void;
 }
@@ -49,21 +51,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <h2>Settings</h2>
+      <div className="modal-panel" onClick={e => e.stopPropagation()}>
+        <h2 className="modal-title">Settings</h2>
         
-        <div className="settings-group">
-          <label>Master Library Location</label>
+        <div className="modal-group">
+          <label className="modal-label">Master Library Location</label>
           <div className="path-row">
             <input 
               type="text" 
               value={libraryPath || "Not Set"} 
               readOnly 
-              className="path-input"
+              className="modal-input"
             />
             <button onClick={handlePickFolder} className="btn-secondary">Change</button>
           </div>
-          <p className="help-text">This is where your comics will be organized and stored permanently.</p>
+          <p className="modal-help-text">This is where your comics will be organized and stored permanently.</p>
         </div>
 
         <div className="modal-actions">

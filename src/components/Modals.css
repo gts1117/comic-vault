@@ -1,0 +1,147 @@
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  backdrop-filter: blur(2px);
+}
+
+.modal-panel {
+  background-color: #1a1a1a;
+  padding: 40px;
+  border-radius: 4px; /* Less rounded, more physical clipboard/box feel */
+  width: 500px;
+  color: #F5F5F0;
+  border: 1px solid #D4AF37;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.05);
+  font-family: 'Inter', sans-serif;
+  animation: panelSlideIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes panelSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-title {
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 15px;
+}
+
+.modal-group {
+  margin-bottom: 25px;
+}
+
+.modal-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #aaa;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.modal-input, .modal-select {
+  width: 100%;
+  padding: 12px 15px;
+  background-color: #111;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #F5F5F0;
+  font-size: 15px;
+  font-family: 'Inter', sans-serif;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+  transition: border-color 0.2s;
+}
+
+.modal-input:focus, .modal-select:focus {
+  outline: none;
+  border-color: #D4AF37;
+}
+
+.modal-help-text {
+  font-size: 12px;
+  color: #888;
+  margin-top: 8px;
+}
+
+.modal-error {
+  color: #E50914;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #333;
+}
+
+.btn-primary {
+  background-color: #D4AF37;
+  color: #111;
+  border: none;
+  padding: 10px 24px;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #e6c55c;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: #222;
+  color: #aaa;
+  border: 1px solid #444;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #333;
+  color: #F5F5F0;
+  border-color: #666;
+}
+
+/* Specific component tweaks */
+.path-row {
+  display: flex;
+  gap: 10px;
+}
+.path-row .modal-input {
+  flex: 1;
+}
